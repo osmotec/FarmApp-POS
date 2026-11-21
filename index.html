@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmacia FarmApp POS</title>
+    <style>
+        :root {
+            --primary: #0D47A1;
+            --primary-light: #E3F2FD;
+            --accent: #1976D2;
+            --danger: #C62828;
+            --danger-light: #FFEBEE;
+            --warning-bg: #FFF3E0;
+            --warning-text: #E65100;
+            --success: #2E7D32;
+            --success-light: #E8F5E9;
+            --bg: #F4F6F4;
+            --text: #333333;
+            --border: #D3D3D3;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 5px;
+        }
+        .tabs {
+            display: flex;
+            background: #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 9px 2px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            color: #555;
+            font-size: 0.75rem;
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-section {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 9px;
+            box-sizing: border-box;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .col {
+            flex: 1;
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 10px;
+            width: 100%;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 5px;
+            box-sizing: border-box;
+            text-align: center;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn:disabled {
+            background-color: #9e9e9e !important;
+            cursor: not-allowed;
+        }
+        .btn-camera {
+            background-color: #2E7D32;
+            margin-bottom: 8px;
+        }
+        .btn-sell {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .btn-edit {
+            background-color: #EF6C00;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            width: 100%;
+        }
+        #interactive.viewport, #interactiveVentas.viewport {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+            background: black;
+        }
+        #interactive.viewport canvas, #interactive.viewport video,
+        #interactiveVentas.viewport canvas, #interactiveVentas.viewport video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tabla-scroll {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-top: 10px;
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .badge-ok {
+            background-color: var(--success-light);
+            color: var(--success);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .badge-warning {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .badge-danger {
+            background-color: var(--danger-light);
+            color: var(--danger);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .corte-caja {
+            background: var(--primary-light);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .resumen-inventario {
+            background: #E8F5E9;
+            border: 1px solid #C8E6C9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+        #syncStatus {
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 6px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        #modalPin {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+        .pin-box {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        #ticketImpresion, #facturaCartaImpresion, #reportePdfImpresion {
+            display: none;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+
+            body.modo-impresion-termica,
+            body.modo-impresion-termica #ticketImpresion,
+            body.modo-impresion-termica #ticketImpresion * {
+                visibility: visible !important;
+            }
+
+            body.modo-impresion-carta,
+            body.modo-impresion-carta #facturaCartaImpresion,
+            body.modo-impresion-carta #facturaCartaImpresion * {
+                visibility: visible !important;
+            }
+
+            body.modo-impresion-pdf,
+            body.modo-impresion-pdf #reportePdfImpresion,
+            body.modo-impresion-pdf #reportePdfImpresion * {
+                visibility: visible !important;
+            }
+
+            body.modo-impresion-termica #ticketImpresion {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 76mm !important;
+                box-sizing: border-box !important;
+                font-family: 'Courier New', Courier, monospace !important;
+                font-size: 13px !important;
+                font-weight: 900 !important;
+                line-height: 1.2 !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+            }
+
+            body.modo-impresion-termica #ticketImpresion span,
+            body.modo-impresion-termica #ticketImpresion div,
+            body.modo-impresion-termica #ticketImpresion small {
+                font-weight: 900 !important;
+                color: #000000 !important;
+            }
+
+            body.modo-impresion-carta #facturaCartaImpresion {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                font-family: Arial, sans-serif !important;
+                font-size: 12px !important;
+                color: #000 !important;
+                padding: 15px !important;
+                background: white !important;
+            }
+
+            body.modo-impresion-pdf #reportePdfImpresion {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                font-family: Arial, sans-serif !important;
+                font-size: 12px !important;
+                color: #000 !important;
+                padding: 10px !important;
+                background: white !important;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+</head>
+<body>
+
+<!-- TICKET TÉRMICO (80mm) -->
+<div id="ticketImpresion">
+    <div style="text-align: center; font-weight: bold; font-size: 15px;">FARMACIA FARMAPP POS</div>
+    <div style="text-align: center; font-size: 11px;" id="ticketSucursalNombre">Farmacia FarmApp POS - Principal</div>
+    <div style="text-align: center; font-size: 11px;">NIT: 53050290</div>
+    <div style="text-align: center; font-size: 11px;">Calle 15 de Septiembre, frente al triángulo</div>
+    <div style="text-align: center; font-size: 11px;">Los Amates, Izabal</div>
+    <div style="text-align: center; font-size: 11px;">WhatsApp: 3565 0881</div>
+    <hr style="border: 0; border-top: 1px dashed #000; margin: 5px 0;">
+    <div style="font-size: 11px;">Ticket de Venta</div>
+    <div style="font-size: 11px;" id="ticketFechaHora"></div>
+    <hr style="border: 0; border-top: 1px dashed #000; margin: 5px 0;">
+    <div id="ticketContenidoItems"></div>
+    <hr style="border: 0; border-top: 1px dashed #000; margin: 5px 0;">
+    <div style="font-weight: bold; font-size: 13px;" id="ticketTotalTexto"></div>
+    <div id="ticketEfectivoTexto"></div>
+    <div id="ticketVueltoTexto"></div>
+    <hr style="border: 0; border-top: 1px dashed #000; margin: 5px 0;">
+    <div style="text-align: center; font-size: 11px; margin-top: 5px;">¡Gracias por su preferencia!</div>
+    <div style="text-align: center; font-size: 10px;">¡Su salud en buenas manos! 💊</div>
+</div>
+
+<!-- COMPROBANTE TAMAÑO CARTA -->
+<div id="facturaCartaImpresion">
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #0D47A1; padding-bottom: 10px; margin-bottom: 15px;">
+        <div>
+            <h2 style="color: #0D47A1; margin: 0;">FARMACIA FARMAPP POS</h2>
+            <p style="margin: 3px 0; font-size: 11px;" id="cartaSucursalNombre">Sucursal: Farmacia FarmApp POS - Principal</p>
+            <p style="margin: 3px 0; font-size: 11px;">Calle 15 de Septiembre, frente al triángulo, Los Amates, Izabal</p>
+            <p style="margin: 3px 0; font-size: 11px;">WhatsApp: 3565 0881 | NIT: 53050290</p>
+        </div>
+        <div style="text-align: right;">
+            <h3 style="color: #0D47A1; margin: 0;">COMPROBANTE DE VENTA</h3>
+            <p style="margin: 3px 0; font-size: 11px;" id="cartaFechaHora"></p>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 15px; font-size: 12px;">
+        <strong>Cliente:</strong> _________________________________________ &nbsp;&nbsp;&nbsp;&nbsp; <strong>NIT:</strong> _______________
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px;">
+        <thead>
+            <tr style="background-color: #0D47A1; color: white;">
+                <th style="padding: 8px; border: 1px solid #ddd;">Descripción del Producto</th>
+                <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Cantidad</th>
+                <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Precio Unitario</th>
+                <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody id="cartaContenidoItems"></tbody>
+    </table>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
+        <div style="width: 250px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
+                <span>Total a Pagar:</span>
+                <strong id="cartaTotalTexto">Q0.00</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
+                <span>Efectivo Recibido:</span>
+                <span id="cartaEfectivoTexto">Q0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; font-weight: bold; color: #0D47A1;">
+                <span>Su Vuelto:</span>
+                <span id="cartaVueltoTexto">Q0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; font-size: 11px; color: #555;">
+        <p>¡Gracias por su compra en Farmacia FarmApp POS Los Amates! Conserve este comprobante para cualquier cambio o garantía.</p>
+    </div>
+</div>
+
+<div id="reportePdfImpresion">
+    <h2 id="pdfTituloReporte" style="text-align: center; color: #0D47A1;">REPORTE DE VENTAS</h2>
+    <p style="text-align: center; font-size: 11px; color: #555;" id="pdfSubtituloFecha"></p>
+    <hr style="border: 0; border-top: 2px solid #0D47A1; margin: 10px 0;">
+    <div id="pdfContenidoCuerpo"></div>
+</div>
+
+<div id="modalPin">
+    <div class="pin-box">
+        <h3>🔐 Seguridad Admin</h3>
+        <p style="font-size: 0.8rem; color: #666; margin-bottom: 12px;">Ingrese PIN de Administrador (Predeterminado: 1234)</p>
+        <input type="password" id="inputPinAdmin" placeholder="****" autofocus onkeydown="manejarEnterPin(event)" style="text-align:center; font-size: 1.3rem; margin-bottom: 12px; letter-spacing: 4px;">
+        <button class="btn" onclick="verificarPinAdmin()">Ingresar a Admin</button>
+        <button class="btn" style="background-color: #757575; margin-top: 8px;" onclick="entrarComoCajero()">Modo Cajero (Solo Ventas)</button>
+    </div>
+</div>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>💊 Farmacia FarmApp POS</h2>
+        <button onclick="window.location.reload(true);" style="background: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🔄 Recargar</button>
+    </div>
+    <div id="syncStatus">🔄 Conectando con los servidores de Firebase...</div>
+
+    <div class="form-section" style="padding: 8px 12px; margin-bottom: 12px; background: #E3F2FD; border-color: #90CAF9;">
+        <div class="row" style="align-items: center;">
+            <div class="col" style="flex: 0 0 auto;">
+                <label for="selectorSucursalActiva" style="margin:0; color: var(--primary);">🏪 Sucursal Activa:</label>
+            </div>
+            <div class="col">
+                <select id="selectorSucursalActiva" onchange="cambiarSucursalActiva(this.value)" style="padding: 6px; font-weight: bold; background: white;">
+                    <option value="Farmacia FarmApp POS - Principal">Farmacia FarmApp POS - Principal</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="btnTabInv" onclick="cambiarPestaña('inventario')">📦 Inventario</button>
+        <button class="tab-btn" id="btnTabVentas" onclick="cambiarPestaña('ventas')">🛒 Ventas</button>
+        <button class="tab-btn" id="btnTabRep" onclick="cambiarPestaña('reportes')">📊 Reportes</button>
+        <button class="tab-btn" id="btnTabConf" onclick="cambiarPestaña('configuracion')">🔑 PIN</button>
+    </div>
+
+    <!-- PESTAÑA 1: INVENTARIO -->
+    <div id="tab-inventario" class="tab-content active">
+        <div class="form-section">
+            <h3 id="tituloFormulario">Registrar / Escanear Producto</h3>
+            <button class="btn btn-camera" onclick="iniciarEscanerCamera('inventario')">📷 Activar Cámara</button>
+            <div id="interactive" class="viewport"></div>
+            <button id="btnDetener" class="btn btn-danger" style="display:none; margin-bottom:10px;" onclick="detenerEscaneo()">Cerrar Cámara</button>
+
+            <input type="hidden" id="editandoId" value="">
+
+            <div class="form-group">
+                <label for="codigoBarras">Código de Barras:</label>
+                <input type="text" id="codigoBarras" placeholder="Escanee o escriba el código...">
+            </div>
+            <div class="form-group">
+                <label for="nombreProducto">Nombre del Medicamento / Producto:</label>
+                <input type="text" id="nombreProducto" placeholder="Ej. Ibuprofena 600mg">
+            </div>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="loteProducto">Número de Lote:</label>
+                    <input type="text" id="loteProducto" placeholder="Ej. L-4589">
+                </div>
+                <div class="form-group col">
+                    <label for="estanteProducto">Estante / Ubicación:</label>
+                    <input type="text" id="estanteProducto" placeholder="Ej. Estante 3A">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="proveedorProducto">Proveedor / Laboratorio:</label>
+                <input type="text" id="proveedorProducto" placeholder="Ej. Distribuidora Farma">
+            </div>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="tipoEmpaque">Se vende por:</label>
+                    <select id="tipoEmpaque" onchange="toggleUnidadesPorCaja()">
+                        <option value="Unidad">Unidad / Frasco</option>
+                        <option value="Caja">Caja Completa</option>
+                    </select>
+                </div>
+                <div class="form-group col" id="grupoUnidadesCaja" style="display: none;">
+                    <label for="unidadesPorCaja">Unidades que trae la caja:</label>
+                    <input type="number" id="unidadesPorCaja" placeholder="Ej. 100" min="1">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="costoProducto">Precio Costo (Q):</label>
+                    <input type="number" id="costoProducto" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="form-group col">
+                    <label for="ventaProducto">Precio Venta (Q):</label>
+                    <input type="number" id="ventaProducto" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="cantidadProducto" id="labelCantidad">Cantidad en Stock:</label>
+                    <input type="number" id="cantidadProducto" placeholder="Ej. 25" min="0">
+                </div>
+                <div class="form-group col">
+                    <label for="vencimientoProducto">Fecha de Vencimiento:</label>
+                    <input type="date" id="vencimientoProducto">
+                </div>
+            </div>
+            <button class="btn" id="btnGuardar" onclick="guardarProductoEnNube()">Guardar en la Nube</button>
+            <button class="btn" id="btnCancelarEdicion" style="background-color: #757575; display:none; margin-top:5px;" onclick="cancelarEdicion()">Cancelar Edición</button>
+        </div>
+
+        <div class="form-section">
+            <h3>Inventario en Tiempo Real (<span id="etiquetaSucursalInventario">Farmacia FarmApp POS - Principal</span>)</h3>
+
+            <div class="resumen-inventario">
+                <div style="font-weight: bold; color: var(--success); margin-bottom: 4px;">📈 Resumen Financiero del Inventario:</div>
+                <div>• Cantidad total de productos: <strong id="resumenCantTotal">0</strong></div>
+                <div>• Costo total (Inversión): <strong id="resumenCostoTotal" style="color: #333;">Q0.00</strong></div>
+                <div>• Valor total (Precio Venta): <strong id="resumenVentaTotal" style="color: var(--success);">Q0.00</strong></div>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="buscador" placeholder="🔍 Buscar por nombre, código, estante o proveedor... (Presione Enter para limpiar)" oninput="filtrarProductosConDebounce()" onkeydown="chequearEnterBuscadorInventario(event)">
+            </div>
+
+            <div class="tabla-scroll">
+                <table id="tablaInventario">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Stock / Ubic.</th>
+                            <th>Precios</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaInventario"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: VENTAS / CARRITO POS -->
+    <div id="tab-ventas" class="tab-content">
+        <div class="form-section" style="border-left: 4px solid var(--success);">
+            <h3 style="color: var(--success);">🛒 Caja Rápida y Carrito de Venta (<span id="etiquetaSucursalVentas">Farmacia FarmApp POS - Principal</span>)</h3>
+
+            <div id="bannerSucursalVentas" style="background: #E8F5E9; border: 1px solid #A5D6A7; color: #1B5E20; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>🏪 Vendiendo en: <span id="badgeSucursalVentas">Farmacia FarmApp POS - Principal</span></span>
+                <span style="font-size: 0.75rem; font-weight: normal; color: #2E7D32;">Stock y ticket de esta sucursal</span>
+            </div>
+
+            <button class="btn btn-camera" onclick="iniciarEscanerCamera('ventas')">📷 Escanear con Cámara para Vender</button>
+            <div id="interactiveVentas" class="viewport"></div>
+            <button id="btnDetenerVentas" class="btn btn-danger" style="display:none; margin-bottom:10px;" onclick="detenerEscaneo()">Cerrar Cámara</button>
+
+            <div class="search-box">
+                <input type="text" id="buscadorVentas" placeholder="🔍 Buscar medicamento para agregar... (Presione Enter para limpiar)" oninput="filtrarProductosVentasConDebounce()" onkeydown="chequearEnterBuscadorVentas(event)">
+            </div>
+
+            <div class="tabla-scroll">
+                <table id="tablaVentas">
+                    <thead>
+                        <tr>
+                            <th>Producto / Ubicación</th>
+                            <th>Stock / Precio</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVentas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="background: #e8f5e9; border: 1px solid #c8e6c9;">
+            <h3 style="color: var(--success); margin-top:0;">🧾 Ticket de Venta Actual (<span id="etiquetaSucursalTicket">Farmacia FarmApp POS - Principal</span>)</h3>
+            <table id="tablaCarrito">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Subtotal</th>
+                        <th>X</th>
+                    </tr>
+                </thead>
+                <tbody id="listaCarrito">
+                    <tr><td colspan="4" style="text-align:center; color:#777;">El carrito está vacío</td></tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 10px; font-size: 1.1rem; font-weight: bold; text-align: right;">
+                Total a Pagar: <span id="totalCarrito" style="color: var(--success);">Q0.00</span>
+            </div>
+
+            <div class="row" style="margin-top: 10px;">
+                <div class="form-group col">
+                    <label for="montoEfectivo">Efectivo Recibido (Q):</label>
+                    <input type="number" id="montoEfectivo" placeholder="0.00" step="0.01" oninput="calcularVuelto()" onkeydown="manejarEnterEfectivo(event)">
+                </div>
+                <div class="form-group col">
+                    <label>Su Vuelto (Cambio):</label>
+                    <div id="textoVuelto" style="font-size: 1.1rem; font-weight: bold; color: var(--primary); padding-top: 8px;">Q0.00</div>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 10px;">
+                <div class="col">
+                    <button class="btn" id="btnCobrarTermica" style="background-color: var(--success); height: 100%;" onclick="cobrarEImprimir('termica')">🖨️ Cobrar (Térmica 80mm)</button>
+                </div>
+                <div class="col">
+                    <button class="btn" id="btnCobrarCarta" style="background-color: var(--primary); height: 100%;" onclick="cobrarEImprimir('carta')">📄 Cobrar (Carta)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3: REPORTES Y CUADRE DE CAJA -->
+    <div id="tab-reportes" class="tab-content">
+        <div class="form-section" style="border-left: 4px solid var(--primary); background: #E3F2FD;">
+            <h3 style="color: var(--primary); margin-top:0;">🔎 Buscar y Filtrar Reportes por Sucursal</h3>
+            <div class="row" style="align-items: center;">
+                <div class="col">
+                    <label for="filtroSucursalReporte">Sucursal en Reportes:</label>
+                    <select id="filtroSucursalReporte" onchange="cambiarSucursalReporte(this.value)" style="background: white; font-weight: bold;">
+                        <option value="Farmacia FarmApp POS - Principal">Farmacia FarmApp POS - Principal</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="buscadorSucursalReporte">Buscar nombre de sucursal:</label>
+                    <input type="text" id="buscadorSucursalReporte" placeholder="Escribe para filtrar sucursales..." oninput="filtrarSelectorSucursalesReporte()" style="background: white;">
+                </div>
+            </div>
+        </div>
+
+        <div class="corte-caja">
+            <h3 style="color: var(--primary); margin:0;">📊 Corte y Cuadre de Caja del Día (<span id="etiquetaSucursalCorte">Farmacia FarmApp POS - Principal</span>)</h3>
+
+            <div class="form-group" style="margin-top: 10px; text-align: left;">
+                <label for="dineroApertura">Dinero con que inicia la caja (Fondo / Vuelto):</label>
+                <div class="row">
+                    <input type="number" id="dineroApertura" placeholder="0.00" step="0.01" value="0.00" style="background: white;">
+                    <button class="btn" style="margin-top:0; width: 130px;" onclick="actualizarCuadreCaja()">Definir Fondo</button>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #b0bec5; margin: 10px 0;">
+
+            <p style="margin: 5px 0; font-size: 0.9rem;">Total transacciones hoy: <strong id="corteTotalVentas">0</strong></p>
+            <p style="margin: 5px 0; font-size: 0.9rem;">Ventas totales de hoy: <strong id="corteIngresos" style="color: var(--success);">Q0.00</strong></p>
+            <p style="margin: 5px 0; font-size: 1rem;">Efectivo Teórico en Gaveta (Fondo + Ventas): <strong id="corteTeorico" style="color: var(--primary);">Q0.00</strong></p>
+
+            <div class="form-group" style="margin-top: 10px; text-align: left; background: #fff; padding: 10px; border-radius: 6px;">
+                <label for="efectivoRealCierre">Con cuánto dinero real cierras la caja (Dinero contado físicamente):</label>
+                <input type="number" id="efectivoRealCierre" placeholder="0.00" step="0.01" oninput="calcularDiferenciaCaja()">
+            </div>
+
+            <p style="margin: 5px 0; font-size: 1.1rem;">Diferencia / Cuadre: <strong id="corteDiferencia" style="color: var(--success);">Q0.00 (Exacto)</strong></p>
+            <p style="margin: 10px 0 0 0; font-size: 1.1rem;">Ganancia Neta de Hoy: <strong id="corteGanancia" style="color: var(--success);">Q0.00</strong></p>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--warning-text); margin-top: 15px; background: #FFF3E0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleSeccionOfertas()">
+                <h3 style="color: var(--warning-text); margin:0;">🏷️ Generador de Ofertas (Próximos a Vencer) <span id="iconoFlechaOfertas" style="font-size: 0.9rem;">▼</span></h3>
+                <button class="btn" style="background-color: var(--warning-text); width: auto; padding: 8px 12px; font-size: 0.8rem; margin-top:0;" onclick="event.stopPropagation(); generarOfertasRecuperacion()">🔥 Crear Ofertas Flash</button>
+            </div>
+
+            <div id="cuerpoOfertasRetractil" style="display: none; margin-top: 12px; border-top: 1px dashed #d08800; padding-top: 10px;">
+                <p style="font-size: 0.85rem; color: #555; margin-top: 0;">Crea automáticamente precios especiales de recuperación para productos próximos a vencer y armar campañas de WhatsApp.</p>
+
+                <div id="resultadoOfertasContainer" style="margin-top: 10px; background: white; padding: 12px; border-radius: 6px; display: none; border: 1px solid var(--border);">
+                    <div id="contenidoOfertasTexto"></div>
+                    <button class="btn" style="background-color: #25D366; margin-top: 10px;" onclick="enviarOfertasWhatsApp()">📱 Compartir Ofertas por WhatsApp</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--accent); margin-top: 15px; background: #E3F2FD;">
+            <h3 style="color: var(--primary); margin-top:0;">🔍 Filtrar Reporte por Rango de Fechas</h3>
+            <div class="row">
+                <div class="form-group col">
+                    <label for="filtroFechaDesde">Desde:</label>
+                    <input type="date" id="filtroFechaDesde">
+                </div>
+                <div class="form-group col">
+                    <label for="filtroFechaHasta">Hasta:</label>
+                    <input type="date" id="filtroFechaHasta">
+                </div>
+            </div>
+            <div class="row" style="margin-top: 5px;">
+                <button class="btn" style="background-color: var(--primary);" onclick="aplicarFiltroFechas()">🔍 Aplicar Filtro</button>
+                <button class="btn" style="background-color: #757575;" onclick="limpiarFiltroFechas()">🔄 Ver Todo</button>
+            </div>
+            <div id="resultadoFiltroContainer" style="margin-top: 12px; background: white; padding: 10px; border-radius: 6px; display: none;">
+                <strong>Resultado del Rango Seleccionado:</strong>
+                <div>• Total Ventas: <strong id="filtroTotalVenta" style="color: var(--success);">Q0.00</strong></div>
+                <div>• Ganancia Neta: <strong id="filtroTotalGanancia" style="color: var(--primary);">Q0.00</strong></div>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--primary); margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3 style="color: var(--primary); margin:0;">📅 Ventas y Ganancias por Día</h3>
+                <button class="btn" style="background-color: var(--primary); width: auto; padding: 8px 12px; font-size: 0.8rem; margin-top:0;" onclick="exportarPdfDias()">📄 Descargar PDF Diario</button>
+            </div>
+            <div class="tabla-scroll">
+                <table id="tablaVentasPorDia">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Productos Vendidos</th>
+                            <th>Total Venta / Ganancia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVentasPorDia">
+                        <tr><td colspan="3" style="text-align:center; color:#777;">No hay registros históricos de días anteriores.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--success); margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3 style="color: var(--success); margin:0;">📆 Ventas y Ganancias por Mes</h3>
+                <button class="btn" style="background-color: var(--success); width: auto; padding: 8px 12px; font-size: 0.8rem; margin-top:0;" onclick="exportarPdfMeses()">📄 Descargar PDF Mensual</button>
+            </div>
+            <div class="tabla-scroll">
+                <table id="tablaVentasPorMes">
+                    <thead>
+                        <tr>
+                            <th>Mes / Año</th>
+                            <th>Productos Vendidos</th>
+                            <th>Total Venta / Ganancia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVentasPorMes">
+                        <tr><td colspan="3" style="text-align:center; color:#777;">No hay registros históricos mensuales.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--warning-text); margin-top: 15px;">
+            <h3 style="color: var(--warning-text);">⚠️ Alerta: Productos Próximos a Vencer (&le; 90 días)</h3>
+            <div class="tabla-scroll">
+                <table id="tablaProximosVencer">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Lote / Vencimiento</th>
+                            <th>Días Restantes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaProximosVencer">
+                        <tr><td colspan="3" style="text-align:center; color:#777;">No hay productos próximos a vencer. 🎉</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--success); margin-top: 15px;">
+            <h3 style="color: var(--success);">💰 Ganancia Unitaria por Producto</h3>
+            <div class="search-box">
+                <input type="text" id="buscadorGananciaProducto" placeholder="🔍 Buscar producto por nombre o código..." oninput="filtrarGananciaPorProducto()">
+            </div>
+            <div class="tabla-scroll">
+                <table id="tablaGananciaProductos">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Costo / Venta</th>
+                            <th>Ganancia c/u</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaGananciaProductos"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--primary); margin-top: 15px;">
+            <h3 style="color: var(--primary);">📋 Resumen de Ventas de Hoy</h3>
+            <div class="tabla-scroll">
+                <table id="tablaResumenVentas">
+                    <thead>
+                        <tr>
+                            <th>N° / Hora</th>
+                            <th>Productos Vendidos</th>
+                            <th>Total Venta / Ganancia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaResumenVentas">
+                        <tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--danger); margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3 style="color: var(--danger); margin:0;">❌ Productos Agotados o Stock Bajo (&le; 2)</h3>
+                <button class="btn" style="background-color: var(--success); width: auto; padding: 8px 12px; font-size: 0.8rem; margin-top:0;" onclick="enviarAgotadosWhatsApp()">📱 Enviar Agotados a WhatsApp</button>
+            </div>
+            <div class="tabla-scroll">
+                <table id="tablaAgotados">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Stock / Estante</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaAgotados"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--success);">
+            <h3 style="color: var(--success);">🔥 Productos Más Vendidos</h3>
+            <div class="tabla-scroll">
+                <table id="tablaMasVendidos">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Total Vendidos</th>
+                            <th>Estante</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaMasVendidos"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 4: CONFIGURACIÓN / PIN, SUCURSALES Y RESPALDO -->
+    <div id="tab-configuracion" class="tab-content">
+        <div class="form-section" style="border-left: 4px solid var(--accent);">
+            <h3 style="color: var(--primary);">🏪 Administrar Sucursales de la Farmacia</h3>
+            <p style="font-size: 0.85rem; color: #666; text-align: center;">Agrega o elimina sucursales para organizar inventario, ventas y reportes por local. Al eliminar una sucursal de prueba, puedes vaciar también sus datos en Firebase.</p>
+            <div class="form-group" style="margin-top: 12px;">
+                <label for="nuevaNombreSucursal">Nombre de la Nueva Sucursal:</label>
+                <input type="text" id="nuevaNombreSucursal" placeholder="Ej. PRUEBA - Temporal">
+            </div>
+            <button class="btn" style="background-color: var(--primary);" onclick="agregarNuevaSucursal()">➕ Agregar y Activar Sucursal</button>
+
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px dashed #ccc;">
+                <label for="selectorEliminarSucursal" style="color: var(--danger);">🗑️ Eliminar Sucursal Existente (y limpiar su BD en Firebase):</label>
+                <select id="selectorEliminarSucursal" style="background: white; margin-bottom: 8px;">
+                    <option value="Farmacia FarmApp POS - Principal">Farmacia FarmApp POS - Principal</option>
+                </select>
+                <button class="btn" style="background-color: var(--danger);" onclick="eliminarSucursal()">🗑️ Eliminar Sucursal Seleccionada</button>
+            </div>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--primary);">
+            <h3 style="color: var(--primary);">🔑 Cambiar Contraseña / PIN de Administrador</h3>
+            <p style="font-size: 0.85rem; color: #666; text-align: center;">Actualiza el código PIN necesario para acceder al panel de inventario y reportes.</p>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="nuevoPinAdmin">Nuevo PIN de Administrador:</label>
+                <input type="password" id="nuevoPinAdmin" placeholder="Ej. 5678" style="text-align: center; font-size: 1.2rem;">
+            </div>
+
+            <button class="btn" style="background-color: var(--primary);" onclick="actualizarPinAdmin()">💾 Guardar Nuevo PIN en la Nube</button>
+        </div>
+
+        <div class="form-section" style="border-left: 4px solid var(--success); margin-top: 15px;">
+            <h3 style="color: var(--success);">💾 Respaldo de Inventario</h3>
+            <p style="font-size: 0.85rem; color: #666; text-align: center;">Descarga o carga una copia de seguridad en formato JSON de tus productos.</p>
+            <button class="btn" style="background-color: var(--success);" onclick="descargarRespaldoInventario()">📥 Descargar Respaldo de Productos</button>
+
+            <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                <label for="archivoRespaldo" style="font-size: 0.85rem; color: #333;">Subir archivo de respaldo (.json):</label>
+                <input type="file" id="archivoRespaldo" accept=".json" style="margin-top: 5px; font-size: 0.8rem;">
+                <button class="btn" id="btnCargarRespaldo" style="background-color: #EF6C00; margin-top: 8px;" onclick="cargarRespaldoInventario()">📤 Restaurar / Cargar Respaldo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    import {
+        getFirestore,
+        collection,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        doc,
+        getDoc,
+        setDoc,
+        onSnapshot,
+        query,
+        where,
+        orderBy,
+        limit,
+        getDocs,
+        writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBluYSs6GjSuzTeP_N9yf9ARcjD6SJihLg",
+      authDomain: "farmacia-d22e2.firebaseapp.com",
+      projectId: "farmacia-d22e2",
+      storageBucket: "farmacia-d22e2.firebasestorage.app",
+      messagingSenderId: "394283176625",
+      appId: "1:394283176625:web:0f31657cc8035e82a00890",
+      measurementId: "G-GBYX2N3NH3"
+    };
+
+    let app;
+    let db;
+    let analytics;
+
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        try {
+            analytics = getAnalytics(app);
+        } catch (e) {}
+    } catch (err) {
+        console.error("Error al inicializar Firebase:", err);
+        document.getElementById('syncStatus').innerHTML = "❌ Error crítico al inicializar Firebase";
+        document.getElementById('syncStatus').style.background = "#FFEBEE";
+        document.getElementById('syncStatus').style.color = "#C62828";
+    }
+
+    const SUCURSAL_DEFAULT = "Farmacia FarmApp POS - Principal";
+    let sucursalesDisponibles = [SUCURSAL_DEFAULT];
+    let sucursalActual = localStorage.getItem("farmapp_sucursal_activa") || SUCURSAL_DEFAULT;
+    let sucursalReporteFiltro = sucursalActual;
+
+    let inventarioTodasSucursales = [];
+    let ventasTodasSucursales = [];
+
+    let inventarioGlobal = [];
+    let inventarioReporteFiltrado = [];
+    let mapaInventario = new Map();
+    let mapaPorCodigo = new Map();
+    const LIMITE_FILAS_TABLA = 60;
+    let limiteActualInventario = LIMITE_FILAS_TABLA;
+    let limiteActualVentas = LIMITE_FILAS_TABLA;
+
+    let carrito = [];
+    let historialVentasDia = [];
+    let ventasHistoricasGlobal = [];
+    let modoEscanerActual = 'inventario';
+    let corteCajaIngresos = 0;
+    let corteCajaGanancia = 0;
+    let corteCajaCantidad = 0;
+    let dineroFondoApertura = 0;
+    let pinActualSistema = "1234";
+
+    let timeoutBusquedaInv = null;
+    let timeoutBusquedaVentas = null;
+    let textoUltimasOfertasGeneradas = "";
+    let reportesDesactualizados = true;
+    let procesandoVenta = false;
+
+    let streamEscanerActivo = null;
+    let intervaloDetectorNativo = null;
+    let enfriamientoEscaneo = false;
+    let timeoutEnfriamiento = null;
+    let audioCtxBeep = null;
+
+    function conTimeout(promesa, ms = 12000, mensaje = "Tiempo de espera agotado con Firebase") {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error(mensaje)), ms);
+            promesa.then(
+                val => { clearTimeout(timer); resolve(val); },
+                err => { clearTimeout(timer); reject(err); }
+            );
+        });
+    }
+
+    function normalizarSucursalDoc(data) {
+        const raw = (data && data.sucursal) ? String(data.sucursal).trim() : "";
+        return raw || SUCURSAL_DEFAULT;
+    }
+
+    function prepararProducto(docSnap) {
+        const data = docSnap.data();
+        const sucursalNorm = normalizarSucursalDoc(data);
+        const item = { id: docSnap.id, ...data, sucursal: sucursalNorm };
+        item._busqueda = `${item.nombre || ""} ${item.codigo || ""} ${item.estante || ""} ${item.proveedor || ""} ${sucursalNorm}`.toLowerCase();
+        return item;
+    }
+
+    function actualizarEtiquetasSucursal() {
+        const invLbl = document.getElementById('etiquetaSucursalInventario');
+        const venLbl = document.getElementById('etiquetaSucursalVentas');
+        const badgeVen = document.getElementById('badgeSucursalVentas');
+        const ticketLbl = document.getElementById('etiquetaSucursalTicket');
+        const corLbl = document.getElementById('etiquetaSucursalCorte');
+        if (invLbl) invLbl.innerText = sucursalActual;
+        if (venLbl) venLbl.innerText = sucursalActual;
+        if (badgeVen) badgeVen.innerText = sucursalActual;
+        if (ticketLbl) ticketLbl.innerText = sucursalActual;
+        if (corLbl) corLbl.innerText = sucursalReporteFiltro;
+    }
+
+    function renderizarSelectoresSucursales(filtroTexto = "") {
+        const selActiva = document.getElementById('selectorSucursalActiva');
+        const selRep = document.getElementById('filtroSucursalReporte');
+        const selEliminar = document.getElementById('selectorEliminarSucursal');
+        const querySuc = String(filtroTexto || "").trim().toLowerCase();
+
+        if (selActiva) {
+            selActiva.innerHTML = "";
+            sucursalesDisponibles.forEach(nombre => {
+                const opt = document.createElement("option");
+                opt.value = nombre;
+                opt.textContent = nombre;
+                if (nombre === sucursalActual) opt.selected = true;
+                selActiva.appendChild(opt);
+            });
+        }
+
+        if (selEliminar) {
+            const valorPrevioEliminar = selEliminar.value;
+            selEliminar.innerHTML = "";
+            sucursalesDisponibles.forEach(nombre => {
+                const opt = document.createElement("option");
+                opt.value = nombre;
+                opt.textContent = nombre;
+                if (nombre === valorPrevioEliminar) opt.selected = true;
+                selEliminar.appendChild(opt);
+            });
+        }
+
+        if (selRep) {
+            const coincidencias = querySuc
+                ? sucursalesDisponibles.filter(n => n.toLowerCase().includes(querySuc))
+                : sucursalesDisponibles;
+            const listaOpciones = coincidencias.length > 0 ? coincidencias : sucursalesDisponibles;
+
+            selRep.innerHTML = "";
+            listaOpciones.forEach(nombre => {
+                const opt = document.createElement("option");
+                opt.value = nombre;
+                opt.textContent = nombre;
+                if (nombre === sucursalReporteFiltro) opt.selected = true;
+                selRep.appendChild(opt);
+            });
+            if (listaOpciones.length > 0 && !listaOpciones.includes(sucursalReporteFiltro)) {
+                sucursalReporteFiltro = listaOpciones[0];
+                selRep.value = sucursalReporteFiltro;
+            }
+        }
+        actualizarEtiquetasSucursal();
+    }
+
+    window.filtrarSelectorSucursalesReporte = function() {
+        const texto = document.getElementById('buscadorSucursalReporte').value || "";
+        renderizarSelectoresSucursales(texto);
+        cambiarSucursalReporte(document.getElementById('filtroSucursalReporte').value);
+    }
+
+    window.cambiarSucursalActiva = function(nuevaSucursal) {
+        if (!nuevaSucursal) return;
+        sucursalActual = nuevaSucursal;
+        localStorage.setItem("farmapp_sucursal_activa", sucursalActual);
+
+        carrito = [];
+        renderizarCarrito();
+        limiteActualInventario = LIMITE_FILAS_TABLA;
+        limiteActualVentas = LIMITE_FILAS_TABLA;
+
+        if (!sucursalesDisponibles.includes(sucursalReporteFiltro)) {
+            sucursalReporteFiltro = sucursalActual;
+        }
+        renderizarSelectoresSucursales(document.getElementById('buscadorSucursalReporte')?.value || "");
+        aplicarSucursalesAEstado();
+    }
+
+    window.cambiarSucursalReporte = function(nuevaSucursalRep) {
+        if (!nuevaSucursalRep) return;
+        sucursalReporteFiltro = nuevaSucursalRep;
+        actualizarEtiquetasSucursal();
+        aplicarSucursalesAEstado();
+        if (document.getElementById('tab-reportes').classList.contains('active')) {
+            actualizarReportesInventario(inventarioReporteFiltrado);
+            renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+            reportesDesactualizados = false;
+        }
+    }
+
+    function aplicarSucursalesAEstado() {
+        const filtradosInv = inventarioTodasSucursales.filter(p => p.sucursal === sucursalActual);
+        const nuevoMapa = new Map();
+        const nuevoMapaCodigo = new Map();
+
+        filtradosInv.forEach(item => {
+            nuevoMapa.set(item.id, item);
+            const codLimpio = String(item.codigo || "").trim();
+            if (codLimpio && !nuevoMapaCodigo.has(codLimpio)) {
+                nuevoMapaCodigo.set(codLimpio, item);
+            }
+        });
+
+        inventarioGlobal = filtradosInv;
+        mapaInventario = nuevoMapa;
+        mapaPorCodigo = nuevoMapaCodigo;
+
+        inventarioReporteFiltrado = inventarioTodasSucursales.filter(p => p.sucursal === sucursalReporteFiltro);
+        ventasHistoricasGlobal = ventasTodasSucursales.filter(v => normalizarSucursalDoc(v) === sucursalReporteFiltro);
+
+        sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
+
+        if (document.getElementById('tab-ventas').classList.contains('active')) {
+            renderizarVentas(inventarioGlobal);
+        }
+        if (document.getElementById('tab-inventario').classList.contains('active')) {
+            renderizarInventario(inventarioGlobal);
+            actualizarResumenInventario(inventarioGlobal);
+        }
+    }
+
+    async function cargarSucursales() {
+        try {
+            const sucRef = doc(db, "configuracion", "sucursales");
+            const sucSnap = await getDoc(sucRef);
+            if (sucSnap.exists() && Array.isArray(sucSnap.data().lista) && sucSnap.data().lista.length > 0) {
+                sucursalesDisponibles = sucSnap.data().lista;
+            } else {
+                await setDoc(sucRef, { lista: sucursalesDisponibles });
+            }
+        } catch (e) {
+            console.error("Error al cargar sucursales:", e);
+        }
+        if (!sucursalesDisponibles.includes(sucursalActual)) {
+            sucursalActual = sucursalesDisponibles[0];
+        }
+        if (!sucursalesDisponibles.includes(sucursalReporteFiltro)) {
+            sucursalReporteFiltro = sucursalActual;
+        }
+        renderizarSelectoresSucursales();
+        aplicarSucursalesAEstado();
+    }
+    cargarSucursales();
+
+    window.agregarNuevaSucursal = async function() {
+        const input = document.getElementById('nuevaNombreSucursal');
+        const nombre = (input.value || "").trim();
+        if (!nombre) {
+            alert("Escribe el nombre de la nueva sucursal.");
+            return;
+        }
+        if (!sucursalesDisponibles.includes(nombre)) {
+            sucursalesDisponibles.push(nombre);
+            try {
+                await setDoc(doc(db, "configuracion", "sucursales"), { lista: sucursalesDisponibles }, { merge: true });
+            } catch (e) {
+                console.error("Error guardando sucursal:", e);
+            }
+        }
+        input.value = "";
+        sucursalReporteFiltro = nombre;
+        renderizarSelectoresSucursales();
+        cambiarSucursalActiva(nombre);
+        alert(`Sucursal "${nombre}" agregada y activada.`);
+    }
+
+    async function borrarDocumentosPorSucursal(nombreColeccion, nombreSucursal) {
+        const q = query(collection(db, nombreColeccion), where("sucursal", "==", nombreSucursal));
+        const snap = await getDocs(q);
+        let eliminados = 0;
+
+        let batch = writeBatch(db);
+        let opsEnBatch = 0;
+
+        for (const docSnap of snap.docs) {
+            batch.delete(docSnap.ref);
+            eliminados++;
+            opsEnBatch++;
+
+            if (opsEnBatch === 450) {
+                await batch.commit();
+                batch = writeBatch(db);
+                opsEnBatch = 0;
+            }
+        }
+
+        if (opsEnBatch > 0) {
+            await batch.commit();
+        }
+
+        return eliminados;
+    }
+
+    window.eliminarSucursal = async function() {
+        const selEliminar = document.getElementById('selectorEliminarSucursal');
+        const nombreEliminar = selEliminar ? selEliminar.value : "";
+
+        if (!nombreEliminar) {
+            alert("Selecciona una sucursal para eliminar.");
+            return;
+        }
+
+        if (sucursalesDisponibles.length <= 1) {
+            alert("Debe existir al menos una sucursal registrada en el sistema.");
+            return;
+        }
+
+        if (nombreEliminar === SUCURSAL_DEFAULT) {
+            alert(`Por seguridad, la sucursal "${SUCURSAL_DEFAULT}" no se puede eliminar ni vaciar desde aquí.`);
+            return;
+        }
+
+        const productosEnSucursal = inventarioTodasSucursales.filter(p => p.sucursal === nombreEliminar).length;
+        const ventasEnSucursal = ventasTodasSucursales.filter(v => normalizarSucursalDoc(v) === nombreEliminar).length;
+
+        const borrarEnBaseDatos = confirm(
+            `Vas a eliminar la sucursal "${nombreEliminar}".\n\n` +
+            `Registros detectados actualmente:\n` +
+            `• Productos: ${productosEnSucursal}\n` +
+            `• Ventas: ${ventasEnSucursal}\n\n` +
+            `¿Deseas ELIMINAR TAMBIÉN todos los productos y ventas de "${nombreEliminar}" de la base de datos de Firebase?\n` +
+            `(Aceptar = Borra sucursal y sus datos de prueba en Firebase | Cancelar = Solo quita la sucursal del selector)`
+        );
+
+        if (!borrarEnBaseDatos) {
+            const soloQuitarLista = confirm(`¿Solo quitar "${nombreEliminar}" del selector sin borrar sus ${productosEnSucursal} productos y ${ventasEnSucursal} ventas de Firebase?`);
+            if (!soloQuitarLista) return;
+        }
+
+        let prodBorrados = 0;
+        let ventasBorradas = 0;
+
+        if (borrarEnBaseDatos) {
+            try {
+                prodBorrados = await borrarDocumentosPorSucursal("inventario_farmacia", nombreEliminar);
+                ventasBorradas = await borrarDocumentosPorSucursal("ventas_farmacia", nombreEliminar);
+            } catch (err) {
+                console.error("Error al borrar datos de la sucursal en Firebase:", err);
+                alert("Ocurrió un error al eliminar los documentos en Firebase. Revisa la consola o las reglas de seguridad.");
+                return;
+            }
+        }
+
+        const nuevaLista = sucursalesDisponibles.filter(s => s !== nombreEliminar);
+        sucursalesDisponibles = nuevaLista.length > 0 ? nuevaLista : [SUCURSAL_DEFAULT];
+
+        try {
+            await setDoc(doc(db, "configuracion", "sucursales"), { lista: sucursalesDisponibles });
+        } catch (e) {
+            console.error("Error al eliminar sucursal en Firebase:", e);
+            alert("No se pudo actualizar la lista de sucursales en la nube.");
+            return;
+        }
+
+        const siguienteSucursal = sucursalesDisponibles[0];
+        if (sucursalReporteFiltro === nombreEliminar) {
+            sucursalReporteFiltro = siguienteSucursal;
+        }
+        if (sucursalActual === nombreEliminar) {
+            sucursalActual = siguienteSucursal;
+            localStorage.setItem("farmapp_sucursal_activa", sucursalActual);
+            carrito = [];
+            renderizarCarrito();
+        }
+
+        renderizarSelectoresSucursales(document.getElementById('buscadorSucursalReporte')?.value || "");
+        aplicarSucursalesAEstado();
+
+        if (borrarEnBaseDatos) {
+            alert(
+                `Sucursal "${nombreEliminar}" eliminada y base de datos limpiada.\n` +
+                `• Productos borrados en Firebase: ${prodBorrados}\n` +
+                `• Ventas borradas en Firebase: ${ventasBorradas}`
+            );
+        } else {
+            alert(`Sucursal "${nombreEliminar}" eliminada del selector. Sucursal activa: "${sucursalActual}".`);
+        }
+    }
+
+    function calcularTotalCarritoNumerico() {
+        let total = 0;
+        for (let i = 0; i < carrito.length; i++) {
+            total += (Number(carrito[i].precio) || 0) * (Number(carrito[i].cantidadReq) || 0);
+        }
+        return total;
+    }
+
+    window.manejarEnterEfectivo = function(event) {
+        if (event.key === 'Enter' && !procesandoVenta) {
+            event.preventDefault();
+            cobrarEImprimir('termica');
+        }
+    }
+
+    window.verMasInventario = function() {
+        limiteActualInventario += LIMITE_FILAS_TABLA;
+        filtrarProductosConDebounce();
+    }
+
+    window.verMasVentas = function() {
+        limiteActualVentas += LIMITE_FILAS_TABLA;
+        filtrarProductosVentasConDebounce();
+    }
+
+    function sincronizarCorteHoyDesdeVentas(ventasLista) {
+        const hoyIso = new Date().toISOString().slice(0, 10);
+        const ventasHoy = ventasLista.filter(v => v.fecha === hoyIso).reverse();
+
+        let ingresosHoy = 0;
+        let gananciaHoy = 0;
+        const historialHoy = [];
+
+        ventasHoy.forEach((v, idx) => {
+            const tot = Number(v.total) || 0;
+            const gan = Number(v.ganancia) || 0;
+            ingresosHoy += tot;
+            gananciaHoy += gan;
+            historialHoy.unshift({
+                numero: idx + 1,
+                hora: v.hora || "",
+                productos: v.productos || "",
+                total: tot,
+                ganancia: gan
+            });
+        });
+
+        corteCajaIngresos = ingresosHoy;
+        corteCajaGanancia = gananciaHoy;
+        corteCajaCantidad = ventasHoy.length;
+        historialVentasDia = historialHoy;
+
+        document.getElementById('corteIngresos').innerText = `Q${corteCajaIngresos.toFixed(2)}`;
+        document.getElementById('corteGanancia').innerText = `Q${corteCajaGanancia.toFixed(2)}`;
+        document.getElementById('corteTotalVentas').innerText = corteCajaCantidad;
+        recalcularCuadreTeorico();
+        renderizarResumenVentasHoy();
+    }
+
+    async function cargarConfiguracionPin() {
+        try {
+            const configRef = doc(db, "configuracion", "seguridad");
+            const configSnap = await getDoc(configRef);
+            if (configSnap.exists()) {
+                pinActualSistema = configSnap.data().pin || "1234";
+            } else {
+                await setDoc(configRef, { pin: "1234" });
+                pinActualSistema = "1234";
+            }
+        } catch (e) {
+            console.error("Error al cargar PIN:", e);
+        }
+    }
+    cargarConfiguracionPin();
+
+    window.actualizarPinAdmin = async function() {
+        const nuevoPin = document.getElementById('nuevoPinAdmin').value.trim();
+        if (!nuevoPin || nuevoPin.length < 3) {
+            alert("Por favor ingrese un PIN válido (mínimo 3 dígitos).");
+            return;
+        }
+
+        try {
+            const configRef = doc(db, "configuracion", "seguridad");
+            await setDoc(configRef, { pin: nuevoPin });
+            pinActualSistema = nuevoPin;
+            document.getElementById('nuevoPinAdmin').value = '';
+            alert("¡Contraseña / PIN de administrador actualizado con éxito en la nube!");
+        } catch (e) {
+            alert("Error al guardar el nuevo PIN en la nube.");
+        }
+    }
+
+    window.actualizarCuadreCaja = function() {
+        dineroFondoApertura = parseFloat(document.getElementById('dineroApertura').value) || 0;
+        recalcularCuadreTeorico();
+        alert("¡Fondo de apertura de caja guardado con éxito!");
+    }
+
+    function recalcularCuadreTeorico() {
+        const efectivoTeorico = dineroFondoApertura + corteCajaIngresos;
+        document.getElementById('corteTeorico').innerText = `Q${efectivoTeorico.toFixed(2)}`;
+        calcularDiferenciaCaja();
+    }
+
+    window.calcularDiferenciaCaja = function() {
+        const efectivoTeorico = dineroFondoApertura + corteCajaIngresos;
+        const efectivoReal = parseFloat(document.getElementById('efectivoRealCierre').value) || 0;
+        const diferencia = efectivoReal - efectivoTeorico;
+
+        const lblDiferencia = document.getElementById('corteDiferencia');
+        if (diferencia === 0) {
+            lblDiferencia.innerText = `Q0.00 (¡Cuadre Exacto! 🎉)`;
+            lblDiferencia.style.color = "var(--success)";
+        } else if (diferencia > 0) {
+            lblDiferencia.innerText = `+Q${diferencia.toFixed(2)} (Sobrante en caja)`;
+            lblDiferencia.style.color = "var(--primary)";
+        } else {
+            lblDiferencia.innerText = `-Q${Math.abs(diferencia).toFixed(2)} (Faltante en caja ⚠️)`;
+            lblDiferencia.style.color = "var(--danger)";
+        }
+    }
+
+    window.descargarRespaldoInventario = function() {
+        if (!inventarioGlobal || inventarioGlobal.length === 0) {
+            alert("No hay productos en el inventario de la sucursal actual para respaldar.");
+            return;
+        }
+        try {
+            const limpio = inventarioGlobal.map(({ _busqueda, ...rest }) => rest);
+            const datosJSON = JSON.stringify(limpio, null, 2);
+            const blob = new Blob([datosJSON], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = url;
+            const fecha = new Date().toISOString().slice(0, 10);
+            downloadAnchor.download = `respaldo_inventario_farmapp_${fecha}.json`;
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            document.body.removeChild(downloadAnchor);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            alert("Error al generar el archivo de respaldo.");
+        }
+    }
+
+    window.cargarRespaldoInventario = async function() {
+        const inputArchivo = document.getElementById('archivoRespaldo');
+        const btnCargar = document.getElementById('btnCargarRespaldo');
+        if (!inputArchivo.files || inputArchivo.files.length === 0) {
+            alert("Por favor seleccione un archivo de respaldo .json primero.");
+            return;
+        }
+
+        const archivo = inputArchivo.files[0];
+        const lector = new FileReader();
+
+        lector.onload = async function(e) {
+            let productosCargados;
+            try {
+                productosCargados = JSON.parse(e.target.result);
+                if (!Array.isArray(productosCargados) || productosCargados.length === 0) {
+                    alert("El archivo no contiene un formato de inventario válido.");
+                    return;
+                }
+            } catch (err) {
+                alert("Error al leer el archivo JSON.");
+                return;
+            }
+
+            if (!confirm(`Se van a agregar ${productosCargados.length} productos a "${sucursalActual}" en la nube. ¿Desea continuar?`)) {
+                return;
+            }
+
+            if (btnCargar) {
+                btnCargar.disabled = true;
+                btnCargar.innerText = "Subiendo en lotes...";
+            }
+
+            try {
+                let contadorCargados = 0;
+                const tamanoLote = 400;
+
+                for (let i = 0; i < productosCargados.length; i += tamanoLote) {
+                    const sublista = productosCargados.slice(i, i + tamanoLote);
+                    const batch = writeBatch(db);
+
+                    for (const p of sublista) {
+                        const nuevoRef = doc(collection(db, "inventario_farmacia"));
+                        batch.set(nuevoRef, {
+                            sucursal: sucursalActual,
+                            codigo: String(p.codigo || 'S/C'),
+                            nombre: String(p.nombre || 'Producto sin nombre'),
+                            lote: String(p.lote || 'N/D'),
+                            estante: String(p.estante || 'General'),
+                            proveedor: String(p.proveedor || 'General'),
+                            tipoEmpaque: p.tipoEmpaque === 'Caja' ? 'Caja' : 'Unidad',
+                            unidadesPorCaja: parseInt(p.unidadesPorCaja) || 1,
+                            cantidad: parseInt(p.cantidad) || 0,
+                            precioCosto: parseFloat(p.precioCosto) || 0,
+                            precioVenta: parseFloat(p.precioVenta) || 0,
+                            vencimiento: p.vencimiento || new Date().toISOString().slice(0, 10),
+                            vendidos: parseInt(p.vendidos) || 0,
+                            actualizado: new Date().toISOString()
+                        });
+                        contadorCargados++;
+                    }
+
+                    await conTimeout(batch.commit(), 20000, "Tiempo agotado al subir un lote a Firestore");
+                }
+
+                alert(`¡Respaldo cargado con éxito! Se registraron ${contadorCargados} productos en "${sucursalActual}".`);
+                inputArchivo.value = '';
+            } catch (err) {
+                console.error("Error al subir respaldo:", err);
+                alert(`Error al subir el respaldo: ${err.message || err}`);
+            } finally {
+                if (btnCargar) {
+                    btnCargar.disabled = false;
+                    btnCargar.innerText = "📤 Restaurar / Cargar Respaldo";
+                }
+            }
+        };
+
+        lector.readAsText(archivo);
+    }
+
+    try {
+        const qInv = query(collection(db, "inventario_farmacia"));
+        onSnapshot(qInv, (snapshot) => {
+            const todas = [];
+            snapshot.forEach((docSnap) => {
+                todas.push(prepararProducto(docSnap));
+            });
+            inventarioTodasSucursales = todas;
+            aplicarSucursalesAEstado();
+
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = `✅ Conectado (${inventarioGlobal.length.toLocaleString()} prod. en ${sucursalActual} | Total BD: ${inventarioTodasSucursales.length})`;
+            statusDiv.style.background = "#E8F5E9";
+            statusDiv.style.color = "#2E7D32";
+
+            if (document.getElementById('tab-reportes').classList.contains('active')) {
+                actualizarReportesInventario(inventarioReporteFiltrado);
+            } else {
+                reportesDesactualizados = true;
+            }
+        }, (error) => {
+            console.error("Error al sincronizar inventario: ", error);
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = `⚠️ Error de conexión con la nube: ${error.code || error.message}`;
+            statusDiv.style.background = "#FFEBEE";
+            statusDiv.style.color = "#C62828";
+        });
+
+        const qVentas = query(
+            collection(db, "ventas_farmacia"),
+            orderBy("fechaHora", "desc"),
+            limit(400)
+        );
+        onSnapshot(qVentas, (snapshot) => {
+            const lista = [];
+            snapshot.forEach((docSnap) => {
+                lista.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            ventasTodasSucursales = lista;
+            ventasHistoricasGlobal = ventasTodasSucursales.filter(v => normalizarSucursalDoc(v) === sucursalReporteFiltro);
+            sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
+
+            if (document.getElementById('tab-reportes').classList.contains('active')) {
+                renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+            } else {
+                reportesDesactualizados = true;
+            }
+        }, (error) => {
+            console.error("Error al sincronizar ventas:", error);
+        });
+    } catch (e) {
+        console.error("Error al configurar listeners de Firestore:", e);
+    }
+
+    window.manejarEnterPin = function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            verificarPinAdmin();
+        }
+    }
+
+    window.verificarPinAdmin = function() {
+        const pin = document.getElementById('inputPinAdmin').value;
+        if (pin === pinActualSistema) {
+            document.getElementById('modalPin').style.display = 'none';
+        } else {
+            alert("PIN incorrecto.");
+        }
+    }
+
+    window.entrarComoCajero = function() {
+        document.getElementById('modalPin').style.display = 'none';
+        document.getElementById('btnTabInv').style.display = 'none';
+        document.getElementById('btnTabRep').style.display = 'none';
+        document.getElementById('btnTabConf').style.display = 'none';
+        cambiarPestaña('ventas');
+    }
+
+    window.cambiarPestaña = function(pestaña) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        actualizarEtiquetasSucursal();
+
+        if (pestaña === 'inventario') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('tab-inventario').classList.add('active');
+            renderizarInventario(inventarioGlobal);
+            actualizarResumenInventario(inventarioGlobal);
+        } else if (pestaña === 'ventas') {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('tab-ventas').classList.add('active');
+            renderizarVentas(inventarioGlobal);
+        } else if (pestaña === 'reportes') {
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+            document.getElementById('tab-reportes').classList.add('active');
+            if (reportesDesactualizados) {
+                actualizarReportesInventario(inventarioReporteFiltrado);
+                renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+                reportesDesactualizados = false;
+            }
+        } else if (pestaña === 'configuracion') {
+            document.querySelectorAll('.tab-btn')[3].classList.add('active');
+            document.getElementById('tab-configuracion').classList.add('active');
+        }
+    }
+
+    window.toggleUnidadesPorCaja = function() {
+        const tipo = document.getElementById('tipoEmpaque').value;
+        const grupoCaja = document.getElementById('grupoUnidadesCaja');
+        const labelCant = document.getElementById('labelCantidad');
+        if (tipo === 'Caja') {
+            grupoCaja.style.display = 'block';
+            labelCant.innerText = "Cantidad en Stock (Cajas):";
+        } else {
+            grupoCaja.style.display = 'none';
+            labelCant.innerText = "Cantidad en Stock (Unidades):";
+        }
+    }
+
+    window.toggleSeccionOfertas = function() {
+        const cuerpo = document.getElementById('cuerpoOfertasRetractil');
+        const flecha = document.getElementById('iconoFlechaOfertas');
+        if (cuerpo.style.display === 'none') {
+            cuerpo.style.display = 'block';
+            flecha.innerText = '▲';
+        } else {
+            cuerpo.style.display = 'none';
+            flecha.innerText = '▼';
+        }
+    }
+
+    window.guardarProductoEnNube = async function() {
+        const idEdicion = document.getElementById('editandoId').value;
+        const codigo = document.getElementById('codigoBarras').value.trim();
+        const nombre = document.getElementById('nombreProducto').value.trim();
+        const lote = document.getElementById('loteProducto').value.trim();
+        const estante = document.getElementById('estanteProducto').value.trim();
+        const proveedor = document.getElementById('proveedorProducto').value.trim();
+        const tipoEmpaque = document.getElementById('tipoEmpaque').value;
+        const unidadesPorCaja = parseInt(document.getElementById('unidadesPorCaja').value) || 1;
+        const precioCosto = parseFloat(document.getElementById('costoProducto').value) || 0;
+        const precioVenta = parseFloat(document.getElementById('ventaProducto').value) || 0;
+        let cantidadIngresada = parseInt(document.getElementById('cantidadProducto').value) || 0;
+        const vencimiento = document.getElementById('vencimientoProducto').value;
+
+        if (!codigo || !nombre || isNaN(cantidadIngresada) || !vencimiento) {
+            alert("Por favor completa los campos obligatorios.");
+            return;
+        }
+
+        const btnGuardar = document.getElementById('btnGuardar');
+        const textoPrevio = btnGuardar.innerText;
+        btnGuardar.disabled = true;
+        btnGuardar.innerText = "Guardando...";
+
+        try {
+            if (idEdicion) {
+                const prodRef = doc(db, "inventario_farmacia", idEdicion);
+                const existente = mapaInventario.get(idEdicion);
+                await conTimeout(updateDoc(prodRef, {
+                    sucursal: (existente && existente.sucursal) ? existente.sucursal : sucursalActual,
+                    codigo,
+                    nombre,
+                    lote: lote || 'N/D',
+                    estante: estante || 'General',
+                    proveedor: proveedor || 'General',
+                    tipoEmpaque,
+                    unidadesPorCaja: tipoEmpaque === 'Caja' ? unidadesPorCaja : 1,
+                    cantidad: cantidadIngresada,
+                    precioCosto,
+                    precioVenta,
+                    vencimiento,
+                    actualizado: new Date().toISOString()
+                }), 12000, "Tiempo agotado al actualizar producto");
+                cancelarEdicion();
+            } else {
+                await conTimeout(addDoc(collection(db, "inventario_farmacia"), {
+                    sucursal: sucursalActual,
+                    codigo,
+                    nombre,
+                    lote: lote || 'N/D',
+                    estante: estante || 'General',
+                    proveedor: proveedor || 'General',
+                    tipoEmpaque,
+                    unidadesPorCaja: tipoEmpaque === 'Caja' ? unidadesPorCaja : 1,
+                    cantidad: cantidadIngresada,
+                    precioCosto,
+                    precioVenta,
+                    vencimiento,
+                    vendidos: 0,
+                    actualizado: new Date().toISOString()
+                }), 12000, "Tiempo agotado al guardar producto");
+                limpiarFormulario();
+            }
+
+            const inputBuscadorInv = document.getElementById('buscador');
+            if (inputBuscadorInv) {
+                inputBuscadorInv.value = '';
+            }
+        } catch (e) {
+            console.error("Error al guardar:", e);
+            alert(`No se pudo guardar en la nube: ${e.message || e}`);
+        } finally {
+            btnGuardar.disabled = false;
+            const editandoActual = document.getElementById('editandoId').value;
+            btnGuardar.innerText = editandoActual ? "Actualizar en la Nube" : "Guardar en la Nube";
+        }
+    }
+
+    window.agregarAlCarrito = function(id) {
+        const producto = mapaInventario.get(id) || inventarioGlobal.find(p => p.id === id);
+        if (!producto) return;
+
+        if (producto.vencimiento) {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const venc = new Date(producto.vencimiento + "T00:00:00");
+            const diferenciaDias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+
+            if (diferenciaDias < 0) {
+                alert(`⛔ VENTA BLOQUEADA: El producto "${producto.nombre}" está VENCIDO (Fecha: ${producto.vencimiento}). No se puede vender por seguridad.`);
+                return;
+            }
+        }
+
+        if (producto.cantidad <= 0) {
+            alert("El producto no tiene stock disponible.");
+            return;
+        }
+
+        const itemEnCarrito = carrito.find(item => item.id === id);
+        if (itemEnCarrito) {
+            if (itemEnCarrito.cantidadReq < producto.cantidad) {
+                itemEnCarrito.cantidadReq++;
+            } else {
+                alert("No hay más stock disponible para este producto.");
+            }
+        } else {
+            carrito.push({
+                id: producto.id,
+                nombre: producto.nombre,
+                precio: Number(producto.precioVenta) || 0,
+                costo: Number(producto.precioCosto) || 0,
+                cantidadReq: 1,
+                stockMax: Number(producto.cantidad) || 0,
+                vendidosActuales: Number(producto.vendidos) || 0,
+                tipoEmpaque: producto.tipoEmpaque || 'Unidad'
+            });
+        }
+        renderizarCarrito();
+    }
+
+    window.cambiarCantidadCarrito = function(index, delta) {
+        carrito[index].cantidadReq += delta;
+        if (carrito[index].cantidadReq <= 0) {
+            carrito.splice(index, 1);
+        } else if (carrito[index].cantidadReq > carrito[index].stockMax) {
+            carrito[index].cantidadReq = carrito[index].stockMax;
+            alert("Alcanzaste el límite del stock disponible.");
+        }
+        renderizarCarrito();
+    }
+
+    window.eliminarDelCarrito = function(index) {
+        carrito.splice(index, 1);
+        renderizarCarrito();
+    }
+
+    function renderizarCarrito() {
+        const tbody = document.getElementById('listaCarrito');
+        let total = 0;
+
+        if (carrito.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">El carrito está vacío</td></tr>`;
+            document.getElementById('totalCarrito').innerText = "Q0.00";
+            document.getElementById('textoVuelto').innerText = "Q0.00";
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        carrito.forEach((item, index) => {
+            const subtotal = item.precio * item.cantidadReq;
+            total += subtotal;
+            const unidadTexto = item.tipoEmpaque === 'Caja' ? ' caja(s)' : ' u.';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.nombre}</strong><br><small>Q${item.precio.toFixed(2)} c/${item.tipoEmpaque === 'Caja' ? 'caja' : 'u.'}</small></td>
+                <td>
+                    <button onclick="cambiarCantidadCarrito(${index}, -1)">-</button>
+                    <strong>${item.cantidadReq}${unidadTexto}</strong>
+                    <button onclick="cambiarCantidadCarrito(${index}, 1)">+</button>
+                </td>
+                <td>Q${subtotal.toFixed(2)}</td>
+                <td><button class="btn-danger" onclick="eliminarDelCarrito(${index})">X</button></td>
+            `;
+            fragment.appendChild(tr);
+        });
+
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+        document.getElementById('totalCarrito').innerText = `Q${total.toFixed(2)}`;
+        calcularVuelto();
+    }
+
+    window.calcularVuelto = function() {
+        const total = calcularTotalCarritoNumerico();
+        const efectivo = parseFloat(document.getElementById('montoEfectivo').value) || 0;
+        const vuelto = efectivo - total;
+
+        const textoVuelto = document.getElementById('textoVuelto');
+        if (efectivo >= total) {
+            textoVuelto.innerText = `Q${vuelto.toFixed(2)}`;
+            textoVuelto.style.color = "var(--success)";
+        } else {
+            textoVuelto.innerText = "Falta efectivo";
+            textoVuelto.style.color = "var(--danger)";
+        }
+    }
+
+    window.cobrarEImprimir = async function(tipoImpresion) {
+        if (procesandoVenta) return;
+        if (carrito.length === 0) {
+            alert("El carrito está vacío.");
+            return;
+        }
+
+        const total = calcularTotalCarritoNumerico();
+        const efectivo = parseFloat(document.getElementById('montoEfectivo').value) || 0;
+
+        if (efectivo < total) {
+            alert("El monto en efectivo es menor al total a pagar.");
+            return;
+        }
+
+        procesandoVenta = true;
+        const btnTermica = document.getElementById('btnCobrarTermica');
+        const btnCarta = document.getElementById('btnCobrarCarta');
+        const textoOriginalTermica = btnTermica.innerText;
+        const textoOriginalCarta = btnCarta.innerText;
+
+        btnTermica.disabled = true;
+        btnCarta.disabled = true;
+        btnTermica.innerText = "⏳ Procesando...";
+        btnCarta.innerText = "⏳ Procesando...";
+
+        try {
+            const snapshotCarrito = carrito.map(item => ({ ...item }));
+            const batch = writeBatch(db);
+
+            let htmlItemsTicket = "";
+            let htmlItemsCarta = "";
+            let gananciaVentaActual = 0;
+            let productosVendidosResumen = [];
+            let itemsDetalleVenta = [];
+
+            for (const item of snapshotCarrito) {
+                const nuevaCantidad = Math.max(0, item.stockMax - item.cantidadReq);
+                const nuevosVendidos = item.vendidosActuales + item.cantidadReq;
+                const prodRef = doc(db, "inventario_farmacia", item.id);
+
+                batch.update(prodRef, {
+                    cantidad: nuevaCantidad,
+                    vendidos: nuevosVendidos
+                });
+
+                const gananciaItem = (item.precio - item.costo) * item.cantidadReq;
+                gananciaVentaActual += gananciaItem;
+
+                const tipoTexto = item.tipoEmpaque === 'Caja' ? 'caja(s)' : 'u.';
+                const subtotalItem = item.precio * item.cantidadReq;
+
+                htmlItemsTicket += `
+                    <div style="margin-bottom: 4px;">
+                        <div><strong>${item.nombre}</strong></div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>${item.cantidadReq} ${tipoTexto} x Q${item.precio.toFixed(2)}</span>
+                            <span>Q${subtotalItem.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+
+                htmlItemsCarta += `
+                    <tr>
+                        <td style="padding: 6px; border: 1px solid #ddd;"><strong>${item.nombre}</strong></td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${item.cantidadReq} ${tipoTexto}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">Q${item.precio.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">Q${subtotalItem.toFixed(2)}</td>
+                    </tr>
+                `;
+
+                productosVendidosResumen.push(`${item.nombre} x${item.cantidadReq}`);
+                itemsDetalleVenta.push({
+                    nombre: item.nombre,
+                    cantidad: item.cantidadReq,
+                    tipo: item.tipoEmpaque,
+                    subtotal: subtotalItem,
+                    ganancia: gananciaItem
+                });
+            }
+
+            const ahora = new Date();
+            const fechaIso = ahora.toISOString().slice(0, 10);
+            const mesIso = ahora.toISOString().slice(0, 7);
+            const horaActual = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const nuevaVentaRef = doc(collection(db, "ventas_farmacia"));
+            batch.set(nuevaVentaRef, {
+                sucursal: sucursalActual,
+                fechaHora: ahora.toISOString(),
+                fecha: fechaIso,
+                mes: mesIso,
+                hora: horaActual,
+                productos: productosVendidosResumen.join(', '),
+                detalleItems: itemsDetalleVenta,
+                total: total,
+                ganancia: gananciaVentaActual
+            });
+
+            await conTimeout(batch.commit(), 12000, "Tiempo agotado al registrar la venta");
+
+            carrito = [];
+            document.getElementById('montoEfectivo').value = '';
+            renderizarCarrito();
+
+            document.getElementById('ticketSucursalNombre').innerText = sucursalActual;
+            document.getElementById('ticketFechaHora').innerText = ahora.toLocaleString();
+            document.getElementById('ticketContenidoItems').innerHTML = htmlItemsTicket;
+            document.getElementById('ticketTotalTexto').innerText = `TOTAL: Q${total.toFixed(2)}`;
+            document.getElementById('ticketEfectivoTexto').innerText = `Efectivo: Q${efectivo.toFixed(2)}`;
+            document.getElementById('ticketVueltoTexto').innerText = `Vuelto: Q${(efectivo - total).toFixed(2)}`;
+
+            document.getElementById('cartaSucursalNombre').innerText = `Sucursal: ${sucursalActual}`;
+            document.getElementById('cartaFechaHora').innerText = "Fecha: " + ahora.toLocaleString();
+            document.getElementById('cartaContenidoItems').innerHTML = htmlItemsCarta;
+            document.getElementById('cartaTotalTexto').innerText = `Q${total.toFixed(2)}`;
+            document.getElementById('cartaEfectivoTexto').innerText = `Q${efectivo.toFixed(2)}`;
+            document.getElementById('cartaVueltoTexto').innerText = `Q${(efectivo - total).toFixed(2)}`;
+
+            document.body.classList.remove('modo-impresion-termica', 'modo-impresion-carta', 'modo-impresion-pdf');
+            if (tipoImpresion === 'termica') {
+                document.body.classList.add('modo-impresion-termica');
+            } else {
+                document.body.classList.add('modo-impresion-carta');
+            }
+
+            setTimeout(() => {
+                try {
+                    window.print();
+                } catch (printErr) {
+                    console.warn("Error al abrir impresión:", printErr);
+                }
+            }, 100);
+        } catch (e) {
+            console.error("Error al procesar venta:", e);
+            alert(`No se pudo completar la venta: ${e.message || e}`);
+        } finally {
+            procesandoVenta = false;
+            btnTermica.disabled = false;
+            btnCarta.disabled = false;
+            btnTermica.innerText = textoOriginalTermica;
+            btnCarta.innerText = textoOriginalCarta;
+        }
+    }
+
+    window.generarOfertasRecuperacion = function() {
+        const hoy = new Date();
+        const productosOferta = inventarioReporteFiltrado.filter(p => {
+            if (!p.vencimiento) return false;
+            const venc = new Date(p.vencimiento + "T00:00:00");
+            const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+            return dias >= 0 && dias <= 60 && (p.cantidad || 0) > 0;
+        });
+
+        if (productosOferta.length === 0) {
+            alert(`¡Excelente! No hay productos próximos a vencer (&le; 60 días) en "${sucursalReporteFiltro}".`);
+            document.getElementById('resultadoOfertasContainer').style.display = 'none';
+            return;
+        }
+
+        let htmlSalida = `<strong>🔥 CAMPAÑA DE OFERTAS FLASH (${sucursalReporteFiltro}):</strong><br><br>`;
+        let textoWhatsApp = `🔥 *OFERTAS FLASH - ${sucursalReporteFiltro}* 🔥\nMedicamentos con precio especial por renovación de lote:\n\n`;
+
+        productosOferta.forEach(p => {
+            const venc = new Date(p.vencimiento + "T00:00:00");
+            const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+
+            const precioOriginal = p.precioVenta || 0;
+            const precioCosto = p.precioCosto || 0;
+            const precioSugeridoOferta = Math.max(precioCosto, precioOriginal * 0.70).toFixed(2);
+
+            htmlSalida += `<div style="margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">`;
+            htmlSalida += `<strong>${p.nombre}</strong> (Stock: ${p.cantidad})<br>`;
+            htmlSalida += `<small>Vence: ${p.vencimiento} (${dias} días) | Precio normal: Q${precioOriginal.toFixed(2)}</small><br>`;
+            htmlSalida += `<span style="color: var(--success); font-weight: bold;">👉 Precio de Oferta Sugerido: Q${precioSugeridoOferta}</span>`;
+            htmlSalida += `</div>`;
+
+            textoWhatsApp += `💊 *${p.nombre}*\n• Stock disponible: ${p.cantidad}\n• Vence el: ${p.vencimiento}\n• 💥 *¡Precio de Oferta: Q${precioSugeridoOferta}!* (Antes Q${precioOriginal.toFixed(2)})\n\n`;
+        });
+
+        textoWhatsApp += `¡Visítanos o haz tu pedido antes de que se agoten! 🛒`;
+        textoUltimasOfertasGeneradas = textoWhatsApp;
+
+        document.getElementById('contenidoOfertasTexto').innerHTML = htmlSalida;
+        document.getElementById('resultadoOfertasContainer').style.display = 'block';
+    }
+
+    window.enviarOfertasWhatsApp = function() {
+        if (!textoUltimasOfertasGeneradas) {
+            alert("Primero genera las ofertas antes de compartirlas.");
+            return;
+        }
+        const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoUltimasOfertasGeneradas)}`;
+        window.open(urlWhatsApp, '_blank');
+    }
+
+    window.aplicarFiltroFechas = async function() {
+        const fechaDesde = document.getElementById('filtroFechaDesde').value;
+        const fechaHasta = document.getElementById('filtroFechaHasta').value;
+
+        if (!fechaDesde || !fechaHasta) {
+            alert("Por favor seleccione ambas fechas (Desde y Hasta).");
+            return;
+        }
+
+        if (fechaDesde > fechaHasta) {
+            alert("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
+            return;
+        }
+
+        try {
+            const qRango = query(
+                collection(db, "ventas_farmacia"),
+                where("fecha", ">=", fechaDesde),
+                where("fecha", "<=", fechaHasta),
+                orderBy("fecha", "desc")
+            );
+            const snap = await getDocs(qRango);
+            const ventasFiltradas = [];
+            snap.forEach(d => {
+                const data = { id: d.id, ...d.data() };
+                if (normalizarSucursalDoc(data) === sucursalReporteFiltro) {
+                    ventasFiltradas.push(data);
+                }
+            });
+
+            let totalVentaFiltro = 0;
+            let totalGananciaFiltro = 0;
+            ventasFiltradas.forEach(v => {
+                totalVentaFiltro += Number(v.total) || 0;
+                totalGananciaFiltro += Number(v.ganancia) || 0;
+            });
+
+            document.getElementById('filtroTotalVenta').innerText = `Q${totalVentaFiltro.toFixed(2)}`;
+            document.getElementById('filtroTotalGanancia').innerText = `Q${totalGananciaFiltro.toFixed(2)}`;
+            document.getElementById('resultadoFiltroContainer').style.display = 'block';
+
+            renderizarReportesDiariosYMensuales(ventasFiltradas);
+        } catch (err) {
+            console.error("Error filtrando ventas por fecha:", err);
+            alert("No se pudo filtrar por rango de fechas. Revise la consola o el índice en Firestore.");
+        }
+    }
+
+    window.limpiarFiltroFechas = function() {
+        document.getElementById('filtroFechaDesde').value = '';
+        document.getElementById('filtroFechaHasta').value = '';
+        document.getElementById('resultadoFiltroContainer').style.display = 'none';
+        renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+    }
+
+    window.exportarPdfDias = function() {
+        if (!ventasHistoricasGlobal || ventasHistoricasGlobal.length === 0) {
+            alert(`No hay ventas registradas en "${sucursalReporteFiltro}" para generar el reporte diario.`);
+            return;
+        }
+
+        let agrupadoDias = {};
+        ventasHistoricasGlobal.forEach(v => {
+            const dia = v.fecha || 'Fecha Desconocida';
+            if (!agrupadoDias[dia]) {
+                agrupadoDias[dia] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
+            }
+            agrupadoDias[dia].totalVenta += v.total;
+            agrupadoDias[dia].totalGanancia += v.ganancia;
+
+            if (v.detalleItems && Array.isArray(v.detalleItems)) {
+                v.detalleItems.forEach(item => {
+                    if (!agrupadoDias[dia].productosMap[item.nombre]) {
+                        agrupadoDias[dia].productosMap[item.nombre] = 0;
+                    }
+                    agrupadoDias[dia].productosMap[item.nombre] += item.cantidad;
+                });
+            }
+        });
+
+        let htmlTabla = `
+            <table style="width:100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background-color: #0D47A1; color: white;">
+                        <th style="padding: 6px; border: 1px solid #ddd;">Fecha</th>
+                        <th style="padding: 6px; border: 1px solid #ddd;">Productos Vendidos</th>
+                        <th style="padding: 6px; border: 1px solid #ddd;">Venta Total</th>
+                        <th style="padding: 6px; border: 1px solid #ddd;">Ganancia Neta</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const diasKeys = Object.keys(agrupadoDias).sort().reverse();
+        diasKeys.forEach(dia => {
+            const data = agrupadoDias[dia];
+            let listaProdTexto = [];
+            for (let prod in data.productosMap) {
+                listaProdTexto.push(`${prod} (x${data.productosMap[prod]})`);
+            }
+
+            htmlTabla += `
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold;">${dia}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">${listaProdTexto.join('<br>')}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">Q${data.totalVenta.toFixed(2)}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; color: #2E7D32; font-weight: bold;">Q${data.totalGanancia.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        htmlTabla += `</tbody></table>`;
+
+        document.getElementById('pdfTituloReporte').innerText = `REPORTE DE VENTAS POR DÍA - ${sucursalReporteFiltro}`;
+        document.getElementById('pdfSubtituloFecha').innerText = "Generado el: " + new Date().toLocaleString();
+        document.getElementById('pdfContenidoCuerpo').innerHTML = htmlTabla;
+
+        document.body.classList.remove('modo-impresion-termica', 'modo-impresion-carta');
+        document.body.classList.add('modo-impresion-pdf');
+
+        window.print();
+    }
+
+    window.exportarPdfMeses = function() {
+        if (!ventasHistoricasGlobal || ventasHistoricasGlobal.length === 0) {
+            alert(`No hay ventas registradas en "${sucursalReporteFiltro}" para generar el reporte mensual.`);
+            return;
+        }
+
+        let agrupadoMeses = {};
+        ventasHistoricasGlobal.forEach(v => {
+            const mes = v.mes || '2026-00';
+            if (!agrupadoMeses[mes]) {
+                agrupadoMeses[mes] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
+            }
+            agrupadoMeses[mes].totalVenta += v.total;
+            agrupadoMeses[mes].totalGanancia += v.ganancia;
+
+            if (v.detalleItems && Array.isArray(v.detalleItems)) {
+                v.detalleItems.forEach(item => {
+                    if (!agrupadoMeses[mes].productosMap[item.nombre]) {
+                        agrupadoMeses[mes].productosMap[item.nombre] = 0;
+                    }
+                    agrupadoMeses[mes].productosMap[item.nombre] += item.cantidad;
+                });
+            }
+        });
+
+        let htmlTabla = `
+            <table style="width:100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background-color: #2E7D32; color: white;">
+                        <th style="padding: 6px; border: 1px solid #ddd;">Mes / Año</th>
+                        <th style="padding: 6px; border: 1px solid #ddd;">Productos Vendidos</th>
+                        <th style="padding: 6px; border: 1px solid #ddd;">Venta Total</th>
+                        <th style="padding: 6px; border: 1px solid #ddd;">Ganancia Neta</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        const mesesKeys = Object.keys(agrupadoMeses).sort().reverse();
+        mesesKeys.forEach(mes => {
+            const data = agrupadoMeses[mes];
+            let listaProdTexto = [];
+            for (let prod in data.productosMap) {
+                listaProdTexto.push(`${prod} (x${data.productosMap[prod]})`);
+            }
+
+            htmlTabla += `
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold;">${mes}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">${listaProdTexto.join('<br>')}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd;">Q${data.totalVenta.toFixed(2)}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; color: #2E7D32; font-weight: bold;">Q${data.totalGanancia.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        htmlTabla += `</tbody></table>`;
+
+        document.getElementById('pdfTituloReporte').innerText = `REPORTE DE VENTAS POR MES - ${sucursalReporteFiltro}`;
+        document.getElementById('pdfSubtituloFecha').innerText = "Generado el: " + new Date().toLocaleString();
+        document.getElementById('pdfContenidoCuerpo').innerHTML = htmlTabla;
+
+        document.body.classList.remove('modo-impresion-termica', 'modo-impresion-carta');
+        document.body.classList.add('modo-impresion-pdf');
+
+        window.print();
+    }
+
+    window.cargarParaEditar = function(id, codigo, nombre, lote, estante, proveedor, tipoEmpaque, unidadesPorCaja, cantidad, precioCosto, precioVenta, vencimiento) {
+        document.getElementById('editandoId').value = id;
+        document.getElementById('codigoBarras').value = codigo;
+        document.getElementById('nombreProducto').value = nombre;
+        document.getElementById('loteProducto').value = lote;
+        document.getElementById('estanteProducto').value = estante;
+        document.getElementById('proveedorProducto').value = proveedor || '';
+        document.getElementById('tipoEmpaque').value = tipoEmpaque;
+        toggleUnidadesPorCaja();
+        document.getElementById('unidadesPorCaja').value = unidadesPorCaja > 1 ? unidadesPorCaja : '';
+        document.getElementById('costoProducto').value = precioCosto;
+        document.getElementById('ventaProducto').value = precioVenta;
+        document.getElementById('cantidadProducto').value = cantidad;
+        document.getElementById('vencimientoProducto').value = vencimiento;
+
+        document.getElementById('tituloFormulario').innerText = "✏️ Modificar Producto";
+        document.getElementById('btnGuardar').innerText = "Actualizar en la Nube";
+        document.getElementById('btnCancelarEdicion').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.cancelarEdicion = function() {
+        limpiarFormulario();
+        document.getElementById('editandoId').value = '';
+        document.getElementById('tituloFormulario').innerText = "Registrar / Escanear Producto";
+        document.getElementById('btnGuardar').innerText = "Guardar en la Nube";
+        document.getElementById('btnCancelarEdicion').style.display = 'none';
+    }
+
+    window.eliminarProductoNube = async function(id) {
+        if (confirm("¿Estás seguro de eliminar este producto?")) {
+            await deleteDoc(doc(db, "inventario_farmacia", id));
+        }
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('codigoBarras').value = '';
+        document.getElementById('nombreProducto').value = '';
+        document.getElementById('loteProducto').value = '';
+        document.getElementById('estanteProducto').value = '';
+        document.getElementById('proveedorProducto').value = '';
+        document.getElementById('tipoEmpaque').value = 'Unidad';
+        document.getElementById('unidadesPorCaja').value = '';
+        document.getElementById('costoProducto').value = '';
+        document.getElementById('ventaProducto').value = '';
+        document.getElementById('cantidadProducto').value = '';
+        document.getElementById('vencimientoProducto').value = '';
+        toggleUnidadesPorCaja();
+    }
+
+    function calcularEstado(fechaVencimiento, cantidad) {
+        if (cantidad <= 0) return { texto: "AGOTADO", clase: "badge-danger" };
+        if (cantidad <= 2) return { texto: `STOCK BAJO (${cantidad})`, clase: "badge-warning" };
+        const hoy = new Date();
+        const venc = new Date(fechaVencimiento + "T00:00:00");
+        const diferenciaDias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+
+        if (diferenciaDias < 0) return { texto: "VENCIDO", clase: "badge-danger" };
+        if (diferenciaDias <= 90) return { texto: `Vence en ${diferenciaDias}d`, clase: "badge-warning" };
+        return { texto: "OK", clase: "badge-ok" };
+    }
+
+    function actualizarReportesInventario(lista) {
+        renderizarAgotados(lista);
+        renderizarMasVendidos(lista);
+        filtrarGananciaPorProducto(lista);
+        renderizarProximosVencer(lista);
+    }
+
+    function actualizarResumenInventario(lista) {
+        let cantidadTotalProductos = 0;
+        let costoTotalInversion = 0;
+        let valorTotalVenta = 0;
+
+        for (let i = 0; i < lista.length; i++) {
+            const p = lista[i];
+            const stock = p.cantidad || 0;
+            const costo = p.precioCosto || 0;
+            const venta = p.precioVenta || 0;
+
+            cantidadTotalProductos += stock;
+            costoTotalInversion += (costo * stock);
+            valorTotalVenta += (venta * stock);
+        }
+
+        document.getElementById('resumenCantTotal').innerText = cantidadTotalProductos.toLocaleString();
+        document.getElementById('resumenCostoTotal').innerText = `Q${costoTotalInversion.toFixed(2)}`;
+        document.getElementById('resumenVentaTotal').innerText = `Q${valorTotalVenta.toFixed(2)}`;
+    }
+
+    function renderizarInventario(lista) {
+        const tbody = document.getElementById('listaInventario');
+        if (lista.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">No hay productos registrados en ${sucursalActual}.</td></tr>`;
+            return;
+        }
+
+        const visible = lista.slice(0, limiteActualInventario);
+        const fragment = document.createDocumentFragment();
+
+        visible.forEach((p) => {
+            const estado = calcularEstado(p.vencimiento, p.cantidad);
+            const infoEmpaque = p.tipoEmpaque === 'Caja' ? `📦 ${p.cantidad} Caja(s) (c/u ${p.unidadesPorCaja} u.)` : `Unid: ${p.cantidad}`;
+            const provTexto = p.proveedor ? ` | 🏢 ${p.proveedor}` : '';
+            const unidCaja = p.unidadesPorCaja !== undefined ? p.unidadesPorCaja : 1;
+            const provSeguro = p.proveedor ? p.proveedor.replace(/'/g, "\\'") : '';
+            const nombreSeguro = (p.nombre || "").replace(/'/g, "\\'");
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
+                <td>${infoEmpaque}<br><small style="color:#0D47A1; font-weight:bold;">📍 ${p.estante}${provTexto}</small></td>
+                <td>V: <strong>Q${Number(p.precioVenta || 0).toFixed(2)}</strong> <small>(${p.tipoEmpaque === 'Caja' ? 'caja' : 'u.'})</small></td>
+                <td><span class="${estado.clase}">${estado.texto}</span></td>
+                <td>
+                    <button class="btn-edit" onclick="cargarParaEditar('${p.id}', '${p.codigo}', '${nombreSeguro}', '${p.lote}', '${p.estante}', '${provSeguro}', '${p.tipoEmpaque || 'Unidad'}', ${unidCaja}, ${p.cantidad}, ${p.precioCosto}, ${p.precioVenta}, '${p.vencimiento}')">Editar</button>
+                    <button class="btn-danger" onclick="eliminarProductoNube('${p.id}')">Eliminar</button>
+                </td>
+            `;
+            fragment.appendChild(tr);
+        });
+
+        if (lista.length > visible.length) {
+            const trMas = document.createElement('tr');
+            trMas.innerHTML = `<td colspan="5" style="text-align:center;"><button class="btn" onclick="verMasInventario()">Mostrar más resultados (${(lista.length - visible.length).toLocaleString()} restantes)</button></td>`;
+            fragment.appendChild(trMas);
+        }
+
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    function renderizarVentas(lista) {
+        const tbody = document.getElementById('listaVentas');
+        if (lista.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay productos disponibles en ${sucursalActual}.</td></tr>`;
+            return;
+        }
+
+        const visible = lista.slice(0, limiteActualVentas);
+        const fragment = document.createDocumentFragment();
+
+        visible.forEach((p) => {
+            const stockTexto = p.tipoEmpaque === 'Caja' ? `${p.cantidad} cajas` : `${p.cantidad} u.`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo} | 📍 ${p.estante}</small></td>
+                <td>Stock: <strong>${stockTexto}</strong><br><strong style="color:var(--success);">Q${Number(p.precioVenta || 0).toFixed(2)} <small>(${p.tipoEmpaque === 'Caja' ? 'caja' : 'u.'})</small></strong></td>
+                <td>
+                    <button class="btn-sell" onclick="agregarAlCarrito('${p.id}')">Agregar</button>
+                </td>
+            `;
+            fragment.appendChild(tr);
+        });
+
+        if (lista.length > visible.length) {
+            const trMas = document.createElement('tr');
+            trMas.innerHTML = `<td colspan="3" style="text-align:center;"><button class="btn" onclick="verMasVentas()">Mostrar más resultados (${(lista.length - visible.length).toLocaleString()} restantes)</button></td>`;
+            fragment.appendChild(trMas);
+        }
+
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    window.filtrarGananciaPorProducto = function(listaBase = null) {
+        const origen = Array.isArray(listaBase) ? listaBase : inventarioReporteFiltrado;
+        const input = document.getElementById('buscadorGananciaProducto');
+        const query = (input && input.value ? input.value : "").trim().toLowerCase();
+
+        if (!query) {
+            renderizarGananciaProductos(origen);
+            return;
+        }
+
+        const filtrados = origen.filter(p => {
+            const nombre = String(p.nombre || "").toLowerCase();
+            const codigo = String(p.codigo || "").toLowerCase();
+            return nombre.includes(query) || codigo.includes(query);
+        });
+        renderizarGananciaProductos(filtrados);
+    }
+
+    function renderizarGananciaProductos(lista) {
+        const tbody = document.getElementById('listaGananciaProductos');
+        if (lista.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No se encontraron productos en ${sucursalReporteFiltro}.</td></tr>`;
+            return;
+        }
+        const fragment = document.createDocumentFragment();
+        lista.slice(0, 200).forEach((p) => {
+            const costo = p.precioCosto || 0;
+            const venta = p.precioVenta || 0;
+            const ganancia = venta - costo;
+            const margen = costo > 0 ? ((ganancia / costo) * 100).toFixed(0) : 0;
+            const tipoTexto = p.tipoEmpaque === 'Caja' ? 'caja' : 'u.';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
+                <td>C: Q${costo.toFixed(2)} | V: Q${venta.toFixed(2)}</td>
+                <td><strong style="color:var(--success);">Q${ganancia.toFixed(2)}</strong> <small>(${margen}%)</small><br><small style="color:#666;">por ${tipoTexto}</small></td>
+            `;
+            fragment.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    function renderizarProximosVencer(lista) {
+        const tbody = document.getElementById('listaProximosVencer');
+        const hoy = new Date();
+
+        const proximos = lista.filter(p => {
+            if (!p.vencimiento) return false;
+            const venc = new Date(p.vencimiento + "T00:00:00");
+            const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+            return dias >= 0 && dias <= 90;
+        });
+
+        if (proximos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay productos próximos a vencer (&le; 90 días). 🎉</td></tr>`;
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        proximos.slice(0, 200).forEach((p) => {
+            const venc = new Date(p.vencimiento + "T00:00:00");
+            const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
+                <td>Lote: ${p.lote || 'N/D'}<br><small>Vence: ${p.vencimiento}</small></td>
+                <td><span class="badge-warning">Quedan ${dias} días</span></td>
+            `;
+            fragment.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    function renderizarResumenVentasHoy() {
+        const tbody = document.getElementById('listaResumenVentas');
+        if (historialVentasDia.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy en ${sucursalReporteFiltro}.</td></tr>`;
+            return;
+        }
+        const fragment = document.createDocumentFragment();
+        historialVentasDia.forEach((v) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>#${v.numero}</strong><br><small style="color:#666;">🕒 ${v.hora}</small></td>
+                <td><small>${v.productos}</small></td>
+                <td>Total: <strong>Q${v.total.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${v.ganancia.toFixed(2)}</strong></td>
+            `;
+            fragment.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    function renderizarReportesDiariosYMensuales(ventas) {
+        const tbodyDia = document.getElementById('listaVentasPorDia');
+        const tbodyMes = document.getElementById('listaVentasPorMes');
+
+        if (!ventas || ventas.length === 0) {
+            tbodyDia.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en ${sucursalReporteFiltro} para este período.</td></tr>`;
+            tbodyMes.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en ${sucursalReporteFiltro} para este período.</td></tr>`;
+            return;
+        }
+
+        let agrupadoDias = {};
+        let agrupadoMeses = {};
+
+        ventas.forEach(v => {
+            const dia = v.fecha || 'Fecha Desconocida';
+            if (!agrupadoDias[dia]) {
+                agrupadoDias[dia] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
+            }
+            agrupadoDias[dia].totalVenta += v.total;
+            agrupadoDias[dia].totalGanancia += v.ganancia;
+
+            const mes = v.mes || '2026-00';
+            if (!agrupadoMeses[mes]) {
+                agrupadoMeses[mes] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
+            }
+            agrupadoMeses[mes].totalVenta += v.total;
+            agrupadoMeses[mes].totalGanancia += v.ganancia;
+
+            if (v.detalleItems && Array.isArray(v.detalleItems)) {
+                v.detalleItems.forEach(item => {
+                    agrupadoDias[dia].productosMap[item.nombre] = (agrupadoDias[dia].productosMap[item.nombre] || 0) + item.cantidad;
+                    agrupadoMeses[mes].productosMap[item.nombre] = (agrupadoMeses[mes].productosMap[item.nombre] || 0) + item.cantidad;
+                });
+            }
+        });
+
+        const fragDia = document.createDocumentFragment();
+        Object.keys(agrupadoDias).sort().reverse().forEach(dia => {
+            const data = agrupadoDias[dia];
+            const listaProdTexto = Object.keys(data.productosMap).map(prod => `• ${prod} (x${data.productosMap[prod]})`);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>📅 ${dia}</strong></td>
+                <td><small>${listaProdTexto.join('<br>')}</small></td>
+                <td>Venta: <strong>Q${data.totalVenta.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${data.totalGanancia.toFixed(2)}</strong></td>
+            `;
+            fragDia.appendChild(tr);
+        });
+        tbodyDia.innerHTML = '';
+        tbodyDia.appendChild(fragDia);
+
+        const fragMes = document.createDocumentFragment();
+        Object.keys(agrupadoMeses).sort().reverse().forEach(mes => {
+            const data = agrupadoMeses[mes];
+            const listaProdTexto = Object.keys(data.productosMap).map(prod => `• ${prod} (x${data.productosMap[prod]})`);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>📆 ${mes}</strong></td>
+                <td><small>${listaProdTexto.join('<br>')}</small></td>
+                <td>Venta: <strong>Q${data.totalVenta.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${data.totalGanancia.toFixed(2)}</strong></td>
+            `;
+            fragMes.appendChild(tr);
+        });
+        tbodyMes.innerHTML = '';
+        tbodyMes.appendChild(fragMes);
+    }
+
+    function renderizarAgotados(lista) {
+        const tbody = document.getElementById('listaAgotados');
+        const agotadosBS = lista.filter(p => p.cantidad <= 2);
+
+        if (agotadosBS.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">Inventario óptimo, sin productos agotados o bajos. 🎉</td></tr>`;
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        agotadosBS.slice(0, 200).forEach((p) => {
+            const esAgotado = p.cantidad <= 0;
+            const estiloStock = esAgotado ? 'color: var(--danger); font-weight: bold;' : 'color: var(--warning-text); font-weight: bold;';
+            const textoEstado = esAgotado ? '🔴 AGOTADO (0)' : `⚠️ Stock bajo: ${p.cantidad}`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small style="${estiloStock}">${textoEstado}</small></td>
+                <td>Cód: ${p.codigo}<br>📍 ${p.estante} ${p.proveedor ? ' | 🏢 ' + p.proveedor : ''}</td>
+                <td><button class="btn-danger" onclick="eliminarProductoNube('${p.id}')">Eliminar</button></td>
+            `;
+            fragment.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    window.enviarAgotadosWhatsApp = function() {
+        const agotadosReales = inventarioReporteFiltrado.filter(p => p.cantidad <= 0);
+        if (agotadosReales.length === 0) {
+            alert(`No hay productos agotados en "${sucursalReporteFiltro}" para reportar.`);
+            return;
+        }
+
+        let textoReporte = `🚨 *REPORTE DE AGOTADOS - ${sucursalReporteFiltro}* 🚨\n\n`;
+        agotadosReales.forEach(p => {
+            textoReporte += `- *${p.nombre}* (Cód: ${p.codigo}) -> *AGOTADO (0)* | Estante: ${p.estante} | Prov: ${p.proveedor || 'N/D'}\n`;
+        });
+        textoReporte += `\nFavor verificar disponibilidad para pedido de reposición. 📦`;
+
+        const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoReporte)}`;
+        window.open(urlWhatsApp, '_blank');
+    }
+
+    function renderizarMasVendidos(lista) {
+        const tbody = document.getElementById('listaMasVendidos');
+        const ordenados = [...lista].sort((a, b) => (b.vendidos || 0) - (a.vendidos || 0)).filter(p => (p.vendidos || 0) > 0).slice(0, 100);
+
+        if (ordenados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas en ${sucursalReporteFiltro}.</td></tr>`;
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        ordenados.forEach((p) => {
+            const unidadTexto = p.tipoEmpaque === 'Caja' ? ' cajas' : ' unidades';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
+                <td><strong style="color:var(--success); font-size: 1rem;">${p.vendidos}${unidadTexto}</strong></td>
+                <td>📍 ${p.estante}</td>
+            `;
+            fragment.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    window.filtrarProductosConDebounce = function() {
+        clearTimeout(timeoutBusquedaInv);
+        timeoutBusquedaInv = setTimeout(() => {
+            const texto = document.getElementById('buscador').value.trim().toLowerCase();
+            if (!texto) {
+                renderizarInventario(inventarioGlobal);
+                return;
+            }
+            const filtrados = inventarioGlobal.filter(p => (p._busqueda || "").includes(texto));
+            renderizarInventario(filtrados);
+        }, 140);
+    }
+
+    window.filtrarProductosVentasConDebounce = function() {
+        clearTimeout(timeoutBusquedaVentas);
+        timeoutBusquedaVentas = setTimeout(() => {
+            const texto = document.getElementById('buscadorVentas').value.trim().toLowerCase();
+            if (!texto) {
+                renderizarVentas(inventarioGlobal);
+                return;
+            }
+            const porCodigoExacto = mapaPorCodigo.get(texto);
+            if (porCodigoExacto) {
+                renderizarVentas([porCodigoExacto]);
+                return;
+            }
+            const filtrados = inventarioGlobal.filter(p => (p._busqueda || "").includes(texto));
+            renderizarVentas(filtrados);
+        }, 140);
+    }
+
+    window.chequearEnterBuscadorInventario = function(event) {
+        if (event.key === 'Enter') {
+            const input = document.getElementById('buscador');
+            input.value = '';
+            limiteActualInventario = LIMITE_FILAS_TABLA;
+            renderizarInventario(inventarioGlobal);
+        }
+    }
+
+    window.chequearEnterBuscadorVentas = function(event) {
+        if (event.key === 'Enter') {
+            const input = document.getElementById('buscadorVentas');
+            const valor = input.value.trim();
+            if (valor) {
+                const exacto = mapaPorCodigo.get(valor);
+                if (exacto) {
+                    agregarAlCarrito(exacto.id);
+                    reproducirBeepCaja();
+                }
+            }
+            input.value = '';
+            limiteActualVentas = LIMITE_FILAS_TABLA;
+            renderizarVentas(inventarioGlobal);
+        }
+    }
+
+    function reproducirBeepCaja() {
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            if (!audioCtxBeep) {
+                audioCtxBeep = new AudioContextClass();
+            }
+            if (audioCtxBeep.state === 'suspended') {
+                audioCtxBeep.resume();
+            }
+
+            const ahora = audioCtxBeep.currentTime;
+            const osc = audioCtxBeep.createOscillator();
+            const gain = audioCtxBeep.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1760, ahora);
+            osc.frequency.exponentialRampToValueAtTime(2200, ahora + 0.08);
+
+            gain.gain.setValueAtTime(0.001, ahora);
+            gain.gain.exponentialRampToValueAtTime(0.25, ahora + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, ahora + 0.14);
+
+            osc.connect(gain);
+            gain.connect(audioCtxBeep.destination);
+
+            osc.start(ahora);
+            osc.stop(ahora + 0.15);
+        } catch (e) {
+            console.warn("No se pudo reproducir el beep:", e);
+        }
+    }
+
+    function mostrarAvisoEscaner(mensaje, esError = false) {
+        const viewportId = modoEscanerActual === 'inventario' ? 'interactive' : 'interactiveVentas';
+        const contenedor = document.getElementById(viewportId);
+        if (!contenedor) return;
+
+        let badge = document.getElementById('avisoEscanerContinuo');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'avisoEscanerContinuo';
+            badge.style.position = 'absolute';
+            badge.style.bottom = '8px';
+            badge.style.left = '8px';
+            badge.style.right = '8px';
+            badge.style.zIndex = '10';
+            badge.style.padding = '6px 10px';
+            badge.style.borderRadius = '6px';
+            badge.style.fontSize = '0.8rem';
+            badge.style.fontWeight = 'bold';
+            badge.style.textAlign = 'center';
+            badge.style.pointerEvents = 'none';
+            contenedor.appendChild(badge);
+        }
+
+        badge.style.background = esError ? 'rgba(198, 40, 40, 0.92)' : 'rgba(46, 125, 50, 0.92)';
+        badge.style.color = '#ffffff';
+        badge.innerText = mensaje;
+    }
+
+    function procesarCodigoDetectado(codigoCrudo) {
+        if (enfriamientoEscaneo) return;
+        const codigoLeido = String(codigoCrudo || "").trim();
+        if (!codigoLeido) return;
+
+        enfriamientoEscaneo = true;
+        clearTimeout(timeoutEnfriamiento);
+        timeoutEnfriamiento = setTimeout(() => {
+            enfriamientoEscaneo = false;
+        }, 1200);
+
+        reproducirBeepCaja();
+
+        if (modoEscanerActual === 'inventario') {
+            document.getElementById('codigoBarras').value = codigoLeido;
+            document.getElementById('buscador').value = '';
+            renderizarInventario(inventarioGlobal);
+            mostrarAvisoEscaner(`📷 Código capturado: ${codigoLeido}`);
+        } else {
+            document.getElementById('buscadorVentas').value = '';
+            const encontrado = mapaPorCodigo.get(codigoLeido) || inventarioGlobal.find(
+                p => String(p.codigo || "").trim() === codigoLeido
+            );
+            if (encontrado) {
+                agregarAlCarrito(encontrado.id);
+                mostrarAvisoEscaner(`✅ Agregado: ${encontrado.nombre}`);
+            } else {
+                mostrarAvisoEscaner(`⚠️ Código (${codigoLeido}) no encontrado`, true);
+            }
+            renderizarVentas(inventarioGlobal);
+        }
+    }
+
+    window.iniciarEscanerCamera = async function(modo) {
+        detenerEscaneo();
+        enfriamientoEscaneo = false;
+        modoEscanerActual = modo;
+
+        const targetId = modo === 'inventario' ? '#interactive' : '#interactiveVentas';
+        const viewportId = modo === 'inventario' ? 'interactive' : 'interactiveVentas';
+        const btnDetenerId = modo === 'inventario' ? 'btnDetener' : 'btnDetenerVentas';
+
+        const contenedor = document.getElementById(viewportId);
+        contenedor.style.position = 'relative';
+        contenedor.style.display = 'block';
+        contenedor.style.height = '240px';
+        document.getElementById(btnDetenerId).style.display = 'block';
+
+        if ('BarcodeDetector' in window) {
+            try {
+                const detector = new window.BarcodeDetector({
+                    formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code']
+                });
+
+                streamEscanerActivo = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        advanced: [{ focusMode: "continuous" }]
+                    },
+                    audio: false
+                });
+
+                contenedor.innerHTML = '';
+                const video = document.createElement('video');
+                video.setAttribute('playsinline', 'true');
+                video.muted = true;
+                video.srcObject = streamEscanerActivo;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                contenedor.appendChild(video);
+                await video.play();
+                mostrarAvisoEscaner("📷 Cámara lista: pase los productos uno tras otro");
+
+                intervaloDetectorNativo = setInterval(async () => {
+                    if (enfriamientoEscaneo || video.readyState < 2) return;
+                    try {
+                        const codigos = await detector.detect(video);
+                        if (codigos && codigos.length > 0) {
+                            procesarCodigoDetectado(codigos[0].rawValue);
+                        }
+                    } catch (e) {}
+                }, 200);
+                return;
+            } catch (errNativo) {
+                console.warn("Usando respaldo Quagga:", errNativo);
+                detenerEscaneo();
+                contenedor.style.display = 'block';
+                document.getElementById(btnDetenerId).style.display = 'block';
+            }
+        }
+
+        contenedor.innerHTML = '';
+        Quagga.offDetected();
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector(targetId),
+                constraints: {
+                    facingMode: "environment",
+                    width: { min: 640, ideal: 1280 },
+                    height: { min: 480, ideal: 720 }
+                }
+            },
+            locator: {
+                patchSize: "medium",
+                halfSample: true
+            },
+            numOfWorkers: 2,
+            decoder: {
+                readers: [
+                    "ean_reader",
+                    "ean_8_reader",
+                    "code_128_reader",
+                    "code_39_reader",
+                    "upc_reader",
+                    "upc_e_reader"
+                ]
+            },
+            locate: true
+        }, function(err) {
+            if (err) {
+                alert("No se pudo iniciar la cámara. Revisa los permisos del navegador.");
+                detenerEscaneo();
+                return;
+            }
+            Quagga.start();
+            mostrarAvisoEscaner("📷 Cámara lista: pase los productos uno tras otro");
+        });
+
+        Quagga.onDetected(function(result) {
+            if (result && result.codeResult && result.codeResult.code) {
+                procesarCodigoDetectado(result.codeResult.code);
+            }
+        });
+    }
+
+    window.detenerEscaneo = function() {
+        enfriamientoEscaneo = false;
+        if (timeoutEnfriamiento) {
+            clearTimeout(timeoutEnfriamiento);
+            timeoutEnfriamiento = null;
+        }
+        if (intervaloDetectorNativo) {
+            clearInterval(intervaloDetectorNativo);
+            intervaloDetectorNativo = null;
+        }
+        if (streamEscanerActivo) {
+            streamEscanerActivo.getTracks().forEach(track => track.stop());
+            streamEscanerActivo = null;
+        }
+        try {
+            Quagga.offDetected();
+            Quagga.stop();
+        } catch (e) {}
+
+        const aviso = document.getElementById('avisoEscanerContinuo');
+        if (aviso) aviso.remove();
+
+        document.getElementById('interactive').style.display = 'none';
+        document.getElementById('btnDetener').style.display = 'none';
+        document.getElementById('interactiveVentas').style.display = 'none';
+        document.getElementById('btnDetenerVentas').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
