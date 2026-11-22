@@ -447,11 +447,11 @@
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
                 <span>Efectivo Recibido:</span>
-                <span id="cartaEfectivoTexto" style="white-space: nowrap;">Q0.00</span>
+                <span id="cartaEfectivoTexto" style="white-space: nowrap;">Q0.00</strong>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; font-weight: bold; color: #0D47A1;">
                 <span>Su Vuelto:</span>
-                <span id="cartaVueltoTexto" style="white-space: nowrap;">Q0.00</span>
+                <span id="cartaVueltoTexto" style="white-space: nowrap;">Q0.00</strong>
             </div>
         </div>
     </div>
@@ -632,13 +632,13 @@
             </div>
 
             <div class="form-section" style="border-left: 4px solid var(--primary); background: #F8FBFF; margin-bottom: 12px;">
-                <h3 style="color: var(--primary); margin-top: 0;">🩺 Asistente de Síntomas (Prioridad por Vencimiento)</h3>
+                <h3 style="color: var(--primary); margin-top: 0;">🩺 Asistente de Enfermedades y Síntomas (Prioridad por Vencimiento)</h3>
                 <p style="font-size: 0.78rem; color: #555; margin: 0 0 8px 0;">
-                    Sugiere productos con stock disponible en <strong id="etiquetaSucursalAsistente">esta sucursal</strong>, ordenados del lote más próximo a vencer al más lejano. Apoyo de mostrador; no sustituye criterio farmacéutico o médico.
+                    Sugiere productos con stock disponible en <strong id="etiquetaSucursalAsistente">esta sucursal</strong> según enfermedad o síntoma, ordenados del lote más próximo a vencer al más lejano. Apoyo de mostrador; no sustituye criterio farmacéutico o médico.
                 </p>
                 <div class="row" style="gap: 8px; align-items: center;">
                     <div class="col">
-                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. dolor de cabeza y fiebre, tos, acidez, alergia..." oninput="if(this.value.trim()===''){limpiarResultadosAsistente();}" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
+                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. infección urinaria, presión alta, gripe, gastritis, dolor de cabeza..." oninput="if(this.value.trim()===''){limpiarResultadosAsistente();}" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
                     </div>
                     <div style="flex: 0 0 auto;">
                         <button type="button" class="btn" id="btnBuscarSintomas" style="margin-top: 0; width: auto; padding: 10px 14px;" onclick="buscarSugerenciasSintomas()">
@@ -1991,7 +1991,7 @@
         }
     }
 
-    /* --- ASISTENTE DE SÍNTOMAS (ORDEN POR VENCIMIENTO + GEMINI 2.5 FLASH + RESPALDO LOCAL) --- */
+    /* --- ASISTENTE DE ENFERMEDADES Y SÍNTOMAS (ORDEN POR VENCIMIENTO + GEMINI 2.5 FLASH + RESPALDO LOCAL) --- */
     window.toggleResultadosAsistente = function() {
         const cont = document.getElementById("resultadosAsistenteSintomas");
         const btn = document.getElementById("btnToggleResultadosSintomas");
@@ -2075,48 +2075,74 @@
     }
 
     function filtrarLocalPorSintoma(consulta, candidatosOrdenados) {
-        const q = consulta.toLowerCase().trim();
-        const diccionarioSintomas = {
-            fiebre: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "antipiretico", "dolor"],
-            dolor: ["ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "diclofenaco", "ketorolaco", "analgesico"],
-            cabeza: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "migraña", "migrana"],
-            garganta: ["ambroxol", "loratadina", "cetirizina", "ibuprofeno", "ibuprofena", "pastilla", "jarabe"],
-            tos: ["ambroxol", "bromhexina", "dextrometorfano", "jarabe", "bronco"],
-            gripe: ["loratadina", "cetirizina", "paracetamol", "acetaminofen", "descongestionante", "antigripal"],
-            resfriado: ["loratadina", "cetirizina", "paracetamol", "acetaminofen", "descongestionante"],
-            alergia: ["loratadina", "cetirizina", "clorfeniramina", "fexofenadina", "antialergico"],
-            estomago: ["omeprazol", "esomeprazol", "antiacido", "bismuto", "hioscina", "simeticona", "gastritis"],
-            acidez: ["omeprazol", "esomeprazol", "antiacido", "ranitidina", "famotidina"],
-            gastritis: ["omeprazol", "esomeprazol", "antiacido", "sucralfato"],
-            colico: ["hioscina", "butilhioscina", "ibuprofeno", "ibuprofena"],
-            diarrea: ["loperamida", "bismuto", "suero", "electrolitos", "rehidratacion"],
-            vomito: ["dimenhydrinato", "dimenidrinato", "metoclopramida", "suero"]
+        const normalizarTexto = (txt) =>
+            String(txt || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+
+        const q = normalizarTexto(consulta).trim();
+        if (!q) return [];
+
+        const mapaEnfermedadesYSintomas = {
+            fiebre: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "dipirona", "antipiretico"],
+            dolor: ["ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "diclofenaco", "ketorolaco", "naproxeno", "meloxicam", "tramadol"],
+            cabeza: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "aspirina", "acido acetilsalicilico", "ergotamina", "sumatriptan"],
+            migrana: ["ergotamina", "sumatriptan", "ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "naproxeno"],
+            garganta: ["ambroxol", "loratadina", "cetirizina", "ibuprofeno", "ibuprofena", "benzidamina", "clorhexidina", "pastilla", "jarabe"],
+            tos: ["ambroxol", "bromhexina", "dextrometorfano", "guaifenesina", "acetilcisteina", "jarabe", "bronco"],
+            bronquitis: ["ambroxol", "bromhexina", "acetilcisteina", "azitromicina", "amoxicilina", "salbutamol", "inhalador"],
+            gripe: ["loratadina", "cetirizina", "clorfeniramina", "paracetamol", "acetaminofen", "fenilefrina", "antigripal"],
+            resfriado: ["loratadina", "cetirizina", "clorfeniramina", "paracetamol", "acetaminofen", "fenilefrina", "antigripal"],
+            alergia: ["loratadina", "cetirizina", "clorfeniramina", "fexofenadina", "desloratadina", "levocetirizina"],
+            estomago: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "antiacido", "bismuto", "hioscina", "simeticona", "magnesia"],
+            acidez: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "antiacido", "famotidina", "magnesia"],
+            gastritis: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "sucralfato", "bismuto", "antiacido"],
+            colico: ["hioscina", "butilhioscina", "ibuprofeno", "ibuprofena", "paracetamol", "diclofenaco"],
+            diarrea: ["loperamida", "bismuto", "suero", "electrolitos", "sales de rehidratacion", "nifuroxazida", "probiotico"],
+            vomito: ["dimenhydrinato", "dimenidrinato", "metoclopramida", "ondansetron", "suero"],
+            infeccion: ["amoxicilina", "azitromicina", "ciprofloxacino", "cefalexina", "trimetoprim", "sulfametoxazol", "doxiciclina", "claritromicina"],
+            urinaria: ["ciprofloxacino", "trimetoprim", "sulfametoxazol", "nitrofurantoina", "fenazopiridina", "norfloxacino"],
+            presion: ["losartan", "enalapril", "valsartan", "amlodipino", "amlodipina", "hidroclorotiazida", "atenolol", "telmisartan"],
+            hipertension: ["losartan", "enalapril", "valsartan", "amlodipino", "amlodipina", "hidroclorotiazida", "atenolol", "telmisartan"],
+            diabetes: ["metformina", "glibenclamida", "glimepirida", "sitagliptina", "insulina"],
+            azucar: ["metformina", "glibenclamida", "glimepirida", "insulina"],
+            hongos: ["clotrimazol", "ketoconazol", "fluconazol", "terbinafina", "miconazol", "nistatina"],
+            parasitos: ["albendazol", "mebendazol", "nitazoxanida", "secnidazol", "metronidazol"],
+            ojos: ["tobramicina", "ciprofloxacino", "gentamicina", "hipromelosa", "lagrimas", "oftalmica", "gotas"],
+            conjuntivitis: ["tobramicina", "ciprofloxacino", "gentamicina", "oftalmica", "gotas"],
+            piel: ["clotrimazol", "hidrocortisona", "mupirocina", "bacitracina", "ketoconazol", "crema", "unguento"],
+            quemadura: ["sulfadiazina", "aloe", "hidrocortisona", "pantenol", "crema"]
         };
 
-        const palabras = q.split(/\s+/).filter(Boolean);
-        const terminosExpandidos = new Set(palabras);
+        const palabras = q.split(/[^a-z0-9]+/).filter((p) => p.length >= 2);
+        const terminosExpandidos = new Set([q, ...palabras]);
 
-        palabras.forEach((pal) => {
-            Object.keys(diccionarioSintomas).forEach((clave) => {
-                if (pal.includes(clave) || clave.includes(pal)) {
+        terminosExpandidos.forEach((termino) => {
+            Object.keys(mapaEnfermedadesYSintomas).forEach((clave) => {
+                if (termino.includes(clave) || clave.includes(termino)) {
                     terminosExpandidos.add(clave);
-                    diccionarioSintomas[clave].forEach((syn) => terminosExpandidos.add(syn.trim()));
+                    mapaEnfermedadesYSintomas[clave].forEach((syn) => {
+                        terminosExpandidos.add(normalizarTexto(syn));
+                    });
                 }
             });
         });
 
-        const coincidencias = candidatosOrdenados.filter(({ prod }) => {
-            const textoProd = `${prod.nombre || ""} ${prod.proveedor || ""}`.toLowerCase();
-            return Array.from(terminosExpandidos).some((termino) => termino.length >= 3 && textoProd.includes(termino));
+        return candidatosOrdenados.filter(({ prod }) => {
+            const textoProd = normalizarTexto(`${prod.nombre || ""} ${prod.proveedor || ""}`);
+            return Array.from(terminosExpandidos).some((termino) => {
+                if (!termino || termino.length < 3) return false;
+                return textoProd.includes(termino);
+            });
         });
-
-        return coincidencias.length > 0 ? coincidencias : candidatosOrdenados.slice(0, 6);
     }
 
-    async function consultarGeminiSintomas(sintoma, candidatosOrdenados, apiKey) {
-        const catalogoReducido = candidatosOrdenados.slice(0, 60).map(({ prod, diasRestantes, precioUnidad }) => ({
+    async function consultarGeminiSintomas(consultaClinica, candidatosOrdenados, apiKey) {
+        const catalogoReducido = candidatosOrdenados.slice(0, 80).map(({ prod, diasRestantes, precioUnidad }) => ({
             id: prod.id,
             nombre: prod.nombre,
+            proveedor: prod.proveedor || "",
             presentacion: prod.tipoEmpaque || "Unidad",
             stock: Number(prod.cantidad) || 0,
             vencimiento: prod.vencimiento,
@@ -2125,11 +2151,11 @@
         }));
 
         const prompt = [
-            `Síntoma o consulta en mostrador de farmacia: "${sintoma}".`,
+            `Enfermedad, síntoma o consulta en mostrador de farmacia: "${consultaClinica}".`,
             `A continuación tienes productos vigentes (no vencidos) y con stock > 0, ya ordenados del más próximo a vencer al más lejano:`,
             JSON.stringify(catalogoReducido),
-            `Selecciona hasta 8 productos del catálogo que mejor correspondan al síntoma.`,
-            `Mantén el orden de menor diasRestantes (más próximo a vencer) primero.`
+            `Selecciona hasta 8 productos del catálogo que correspondan clínicamente a la enfermedad o síntoma indicado (asociando enfermedades o cuadros comunes con principios activos, familias farmacológicas o presentaciones del catálogo, aunque el nombre exacto de la enfermedad no aparezca en el título).`,
+            `No incluyas productos sin relación con la consulta. Mantén el orden de menor diasRestantes (más próximo a vencer) primero.`
         ].join("\n");
 
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
@@ -2202,7 +2228,7 @@
 
         if (!items || items.length === 0) {
             if (barra) barra.style.display = "none";
-            cont.innerHTML = `<div style="font-size:0.82rem; color:#777; padding:6px;">No se encontraron productos vigentes con stock para ese síntoma en ${sucursalActual}.</div>`;
+            cont.innerHTML = `<div style="font-size:0.82rem; color:#777; padding:6px;">No se encontraron productos vigentes con stock relacionados con esa enfermedad o síntoma en ${sucursalActual}.</div>`;
             return;
         }
 
@@ -2250,7 +2276,7 @@
 
         const sintoma = (input?.value || "").trim();
         if (!sintoma) {
-            alert("Escribe un síntoma o consulta para buscar sugerencias.");
+            alert("Escribe una enfermedad o síntoma para buscar sugerencias.");
             return;
         }
 
@@ -2265,7 +2291,7 @@
             btn.innerText = "⏳ Buscando...";
         }
         if (estado) {
-            estado.innerHTML = "🔄 Ordenando por fecha de vencimiento y consultando sugerencias...";
+            estado.innerHTML = "🔄 Buscando productos relacionados y ordenando por vencimiento más próximo...";
         }
 
         try {
@@ -2275,7 +2301,7 @@
                 if (sugerenciasIA.length > 0) {
                     renderizarResultadosAsistente(
                         sugerenciasIA,
-                        `✅ Sugerencias con <strong>Gemini 2.5 Flash</strong> ordenadas por vencimiento más próximo (${sucursalActual})`
+                        `✅ Sugerencias por enfermedad/síntoma con <strong>Gemini 2.5 Flash</strong> ordenadas por vencimiento más próximo (${sucursalActual})`
                     );
                     return;
                 }
@@ -2284,14 +2310,18 @@
             const sugerenciasLocales = filtrarLocalPorSintoma(sintoma, candidatosOrdenados);
             renderizarResultadosAsistente(
                 sugerenciasLocales,
-                `ℹ️ Sugerencias por filtro local ordenadas por vencimiento más próximo (${sucursalActual})`
+                sugerenciasLocales.length > 0
+                    ? `ℹ️ Sugerencias por enfermedad/síntoma (filtro local) ordenadas por vencimiento más próximo (${sucursalActual})`
+                    : `⚠️ No se encontraron productos relacionados con "${sintoma}" con stock vigente en ${sucursalActual}.`
             );
         } catch (err) {
             console.warn("Fallo IA, usando respaldo local:", err);
             const sugerenciasLocales = filtrarLocalPorSintoma(sintoma, candidatosOrdenados);
             renderizarResultadosAsistente(
                 sugerenciasLocales,
-                `⚠️ Respaldo local activo (ordenado por vencimiento más próximo en ${sucursalActual})`
+                sugerenciasLocales.length > 0
+                    ? `⚠️ Respaldo local activo (ordenado por vencimiento más próximo en ${sucursalActual})`
+                    : `⚠️ No se encontraron productos relacionados con "${sintoma}" con stock vigente en ${sucursalActual}.`
             );
         } finally {
             if (btn) {
@@ -4094,4 +4124,4 @@
 </script>
 
 </body>
-</html>
+    </html>
