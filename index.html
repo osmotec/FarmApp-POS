@@ -128,11 +128,24 @@
             background-color: var(--success);
             color: white;
             border: none;
-            padding: 6px 10px;
+            padding: 6px 8px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: bold;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        .btn-sell-box {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: bold;
+            width: 100%;
         }
         .btn-edit {
             background-color: #EF6C00;
@@ -167,7 +180,8 @@
             display: none;
             background: black;
         }
-        #interactive.viewport canvas, #interactive.viewport video,
+        #interactive.viewport canvas, 
+#interactive.viewport video,
         #interactiveVentas.viewport canvas, #interactiveVentas.viewport video {
             width: 100%;
             height: 100%;
@@ -242,9 +256,23 @@
             font-weight: bold;
             padding: 6px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             background: #FFF3E0;
             color: #E65100;
+        }
+        #barraPendientesOffline {
+            display: none;
+            background: #FFF8E1;
+            border: 1px solid #FFB300;
+            color: #5D4037;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .footer-propiedad {
             text-align: center;
@@ -333,7 +361,8 @@
                 font-size: 11px !important;
                 line-height: 1.35 !important;
                 color: #000000 !important;
-                background: #ffffff !important;
+                background: #ffffff !
+important;
             }
 
             body.modo-impresion-carta #facturaCartaImpresion * {
@@ -397,7 +426,8 @@
         <div style="flex: 1; min-width: 0;">
             <h2 style="color: #0D47A1; margin: 0 0 4px 0; font-size: 16px; text-align: left;">FARMACIA FARMAPP POS</h2>
             <p style="margin: 2px 0; font-size: 11px;" id="cartaSucursalNombre">Sucursal: Farmacia FarmApp POS - Principal</p>
-            <p style="margin: 2px 0; font-size: 11px;">Calle 15 de Septiembre, frente al triángulo, Los Amates, Izabal</p>
+            <p style="margin: 2px 0; font-size: 11px;">Calle 15 de 
+Septiembre, frente al triángulo, Los Amates, Izabal</p>
             <p style="margin: 2px 0; font-size: 11px;">WhatsApp: 3565 0881 | NIT: 53050290</p>
         </div>
         <div style="text-align: right; flex-shrink: 0; max-width: 45%;">
@@ -427,7 +457,8 @@
         <div style="width: 240px; font-size: 11px;">
             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
                 <span>Total a Pagar:</span>
-                <strong id="cartaTotalTexto" style="white-space: nowrap;">Q0.00</strong>
+                <strong id="cartaTotalTexto" style="white-space: 
+nowrap;">Q0.00</strong>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
                 <span>Efectivo Recibido:</span>
@@ -458,7 +489,8 @@
         <p style="font-size: 0.8rem; color: #666; margin-bottom: 12px;">Ingrese PIN de Administrador (Predeterminado: 1234)</p>
         <input type="password" id="inputPinAdmin" placeholder="****" autofocus onkeydown="manejarEnterPin(event)" style="text-align:center; font-size: 1.3rem; margin-bottom: 12px; letter-spacing: 4px;">
         <button class="btn" onclick="verificarPinAdmin()">Ingresar a Admin</button>
-        <button class="btn" style="background-color: #757575; margin-top: 8px;" onclick="entrarComoCajero()">Modo Cajero (Solo Ventas)</button>
+        <button class="btn" style="background-color: #757575; 
+margin-top: 8px;" onclick="entrarComoCajero()">Modo Cajero (Solo Ventas)</button>
         <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 </div>
@@ -466,9 +498,17 @@
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2>💊 Farmacia FarmApp POS</h2>
-        <button onclick="window.location.reload(true);" style="background: #d9534f; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🔄 Recargar</button>
+        <button onclick="window.location.reload(true);" style="background: #d9534f; color: 
+white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">🔄 Recargar</button>
     </div>
     <div id="syncStatus">🔄 Conectando con los servidores de Firebase...</div>
+    <div id="barraPendientesOffline">
+        <span id="textoPendientesOffline">⏳ Ventas guardadas sin conexión pendientes de subir: <strong>0</strong></span>
+        <button type="button" id="btnSincronizarPendientes" onclick="sincronizarVentasPendien
+tes(true)" style="background-color: #0D47A1; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: bold; cursor: pointer;">
+            ☁️ Sincronizar Ahora
+        </button>
+    </div>
 
     <div class="form-section" style="padding: 8px 12px; margin-bottom: 12px; background: #E3F2FD; border-color: #90CAF9;">
         <div class="row" style="align-items: center;">
@@ -487,7 +527,8 @@
         <button class="tab-btn active" id="btnTabInv" onclick="cambiarPestaña('inventario')">📦 Inventario</button>
         <button class="tab-btn" id="btnTabVentas" onclick="cambiarPestaña('ventas')">🛒 Ventas</button>
         <button class="tab-btn" id="btnTabRep" onclick="cambiarPestaña('reportes')">📊 Reportes</button>
-        <button class="tab-btn" id="btnTabConf" onclick="cambiarPestaña('configuracion')">🔑 PIN</button>
+        <button class="tab-btn" 
+id="btnTabConf" onclick="cambiarPestaña('configuracion')">🔑 PIN</button>
     </div>
 
     <!-- PESTAÑA 1: INVENTARIO -->
@@ -511,7 +552,8 @@
             <div class="row">
                 <div class="form-group col">
                     <label for="loteProducto">Número de Lote:</label>
-                    <input type="text" id="loteProducto" placeholder="Ej. L-4589">
+                    <input type="text" id="loteProducto" placeholder="Ej. 
+L-4589">
                 </div>
                 <div class="form-group col">
                     <label for="estanteProducto">Estante / Ubicación:</label>
@@ -520,14 +562,15 @@
             </div>
             <div class="form-group">
                 <label for="proveedorProducto">Proveedor / Laboratorio:</label>
-                <input type="text" id="proveedorProducto" placeholder="Ej. Distribuidora Farma">
+                <input type="text" id="proveedorProducto" 
+placeholder="Ej. Distribuidora Farma">
             </div>
             <div class="row">
                 <div class="form-group col">
-                    <label for="tipoEmpaque">Se vende por:</label>
+                    <label for="tipoEmpaque">Presentación / Empaque:</label>
                     <select id="tipoEmpaque" onchange="toggleUnidadesPorCaja()">
                         <option value="Unidad">Unidad / Frasco</option>
-                        <option value="Caja">Caja Completa</option>
+                        <option value="Caja">Caja (Venta por Caja o Unidad)</option>
                     </select>
                 </div>
                 <div class="form-group col" id="grupoUnidadesCaja" style="display: none;">
@@ -537,11 +580,12 @@
             </div>
             <div class="row">
                 <div class="form-group col">
-                    <label for="costoProducto">Precio Costo (Q):</label>
+                    <label for="costoProducto" 
+id="labelCosto">Precio Costo (Q):</label>
                     <input type="number" id="costoProducto" placeholder="0.00" step="0.01" min="0">
                 </div>
                 <div class="form-group col">
-                    <label for="ventaProducto">Precio Venta (Q):</label>
+                    <label for="ventaProducto" id="labelVenta">Precio Venta (Q):</label>
                     <input type="number" id="ventaProducto" placeholder="0.00" step="0.01" min="0">
                 </div>
             </div>
@@ -549,6 +593,7 @@
                 <div class="form-group col">
                     <label for="cantidadProducto" id="labelCantidad">Cantidad en Stock:</label>
                     <input type="number" id="cantidadProducto" placeholder="Ej. 25" min="0">
+                    <small id="ayudaCantidadCaja" style="display:none; color:#0D47A1; font-size:0.75rem;">Al crear producto nuevo en Caja, se convierte a unidades (Cajas × Unidades por caja).</small>
                 </div>
                 <div class="form-group col">
                     <label for="vencimientoProducto">Fecha de Vencimiento:</label>
@@ -556,7 +601,8 @@
                 </div>
             </div>
             <button class="btn" id="btnGuardar" onclick="guardarProductoEnNube()">Guardar en la Nube</button>
-            <button class="btn" id="btnCancelarEdicion" style="background-color: #757575; display:none; margin-top:5px;" onclick="cancelarEdicion()">Cancelar Edición</button>
+            <button class="btn" id="btnCancelarEdicion" style="background-color: #757575; display:none; margin-top:5px;" onc
+lick="cancelarEdicion()">Cancelar Edición</button>
         </div>
 
         <div class="form-section">
@@ -564,17 +610,20 @@
 
             <div class="resumen-inventario">
                 <div style="font-weight: bold; color: var(--success); margin-bottom: 4px;">📈 Resumen Financiero del Inventario:</div>
-                <div>• Cantidad total de productos: <strong id="resumenCantTotal">0</strong></div>
+                <div>• Cantidad total de productos: <strong 
+id="resumenCantTotal">0</strong></div>
                 <div>• Costo total (Inversión): <strong id="resumenCostoTotal" style="color: #333;">Q0.00</strong></div>
                 <div>• Valor total (Precio Venta): <strong id="resumenVentaTotal" style="color: var(--success);">Q0.00</strong></div>
             </div>
 
             <div class="search-box">
-                <input type="text" id="buscador" placeholder="🔍 Buscar por nombre, código, estante o proveedor... (Presione Enter para limpiar)" oninput="filtrarProductosConDebounce()" onkeydown="chequearEnterBuscadorInventario(event)">
+                <input type="text" id="buscador" placeholder="🔍 
+Buscar por nombre, código, estante o proveedor... (Presione Enter para limpiar)" oninput="filtrarProductosConDebounce()" onkeydown="chequearEnterBuscadorInventario(event)">
             </div>
 
             <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-                <button type="button" id="btnExportarExcel" onclick="exportarInventarioExcel()" style="background-color: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
+                <button type="button" id="btnExportarExcel" onclick="exportarInventarioExcel()" style="background-color: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 
+bold; cursor: pointer;">
                     📊 Exportar a Excel
                 </button>
             </div>
@@ -610,7 +659,8 @@
 
             <button class="btn btn-camera" onclick="iniciarEscanerCamera('ventas')">📷 Escanear con Cámara para Vender</button>
             <div id="interactiveVentas" class="viewport"></div>
-            <button id="btnDetenerVentas" class="btn btn-danger" style="display:none; margin-bottom:10px;" onclick="detenerEscaneo()">Cerrar Cámara</button>
+            <button id="btnDetenerVentas" class="btn 
+btn-danger" style="display:none; margin-bottom:10px;" onclick="detenerEscaneo()">Cerrar Cámara</button>
 
             <div class="search-box">
                 <input type="text" id="buscadorVentas" placeholder="🔍 Buscar medicamento para agregar... (Presione Enter para limpiar)" oninput="filtrarProductosVentasConDebounce()" onkeydown="chequearEnterBuscadorVentas(event)">
@@ -642,7 +692,8 @@
                     </tr>
                 </thead>
                 <tbody id="listaCarrito">
-                    <tr><td colspan="4" style="text-align:center; color:#777;">El carrito está vacío</td></tr>
+                    <tr><td colspan="4" style="text-align:center; 
+color:#777;">El carrito está vacío</td></tr>
                 </tbody>
             </table>
 
@@ -657,7 +708,8 @@
                 </div>
                 <div class="form-group col">
                     <label>Su Vuelto (Cambio):</label>
-                    <div id="textoVuelto" style="font-size: 1.1rem; font-weight: bold; color: var(--primary); padding-top: 8px;">Q0.00</div>
+                    <div id="textoVuelto" style="font-size: 1.1rem; font-weight: bold; color: var(--primary); padding-top: 
+8px;">Q0.00</div>
                 </div>
             </div>
 
@@ -666,7 +718,8 @@
                     <button class="btn" id="btnCobrarTermica" style="background-color: var(--success); height: 100%;" onclick="cobrarEImprimir('termica')">🖨️ Cobrar (Térmica 80mm)</button>
                 </div>
                 <div class="col">
-                    <button class="btn" id="btnCobrarCarta" style="background-color: var(--primary); height: 100%;" onclick="cobrarEImprimir('carta')">📄 Cobrar (Carta)</button>
+                    <button class="btn" id="btnCobrarCarta" style="background-color: 
+var(--primary); height: 100%;" onclick="cobrarEImprimir('carta')">📄 Cobrar (Carta)</button>
                 </div>
             </div>
         </div>
@@ -676,13 +729,15 @@
 
     <!-- PESTAÑA 3: REPORTES Y CUADRE DE CAJA -->
     <div id="tab-reportes" class="tab-content">
-        <div class="form-section" style="border-left: 4px solid var(--primary); background: #E3F2FD;">
+        <div class="form-section" style="border-left: 4px solid 
+var(--primary); background: #E3F2FD;">
             <h3 style="color: var(--primary); margin-top:0;">🔎 Buscar y Filtrar Reportes por Sucursal</h3>
             <div class="row" style="align-items: center;">
                 <div class="col">
                     <label for="filtroSucursalReporte">Sucursal en Reportes:</label>
                     <select id="filtroSucursalReporte" onchange="cambiarSucursalReporte(this.value)" style="background: white; font-weight: bold;">
-                        <option value="Farmacia FarmApp POS - Principal">Farmacia FarmApp POS - Principal</option>
+                        <option 
+value="Farmacia FarmApp POS - Principal">Farmacia FarmApp POS - Principal</option>
                     </select>
                 </div>
                 <div class="col">
@@ -698,18 +753,21 @@
             <div class="form-group" style="margin-top: 10px; text-align: left;">
                 <label for="dineroApertura">Dinero con que inicia la caja (Fondo / Vuelto):</label>
                 <div class="row">
-                    <input type="number" id="dineroApertura" placeholder="0.00" step="0.01" value="0.00" style="background: white;">
+                    <input type="number" 
+id="dineroApertura" placeholder="0.00" step="0.01" value="0.00" style="background: white;">
                     <button class="btn" style="margin-top:0; width: 130px;" onclick="actualizarCuadreCaja()">Definir Fondo</button>
                 </div>
             </div>
 
             <hr style="border: 0; border-top: 1px solid #b0bec5; margin: 10px 0;">
 
-            <p style="margin: 5px 0; font-size: 0.9rem;">Total transacciones hoy: <strong id="corteTotalVentas">0</strong></p>
+            <p style="margin: 5px 0; font-size: 0.9rem;">Total 
+transacciones hoy: <strong id="corteTotalVentas">0</strong></p>
             <p style="margin: 5px 0; font-size: 0.9rem;">Ventas totales de hoy: <strong id="corteIngresos" style="color: var(--success);">Q0.00</strong></p>
             <p style="margin: 5px 0; font-size: 1rem;">Efectivo Teórico en Gaveta (Fondo + Ventas): <strong id="corteTeorico" style="color: var(--primary);">Q0.00</strong></p>
 
-            <div class="form-group" style="margin-top: 10px; text-align: left; background: #fff; padding: 10px; border-radius: 6px;">
+            <div class="form-group" style="margin-top: 10px; text-align: left; background: #fff; padding: 
+10px; border-radius: 6px;">
                 <label for="efectivoRealCierre">Con cuánto dinero real cierras la caja (Dinero contado físicamente):</label>
                 <input type="number" id="efectivoRealCierre" placeholder="0.00" step="0.01" oninput="calcularDiferenciaCaja()">
             </div>
@@ -720,16 +778,19 @@
 
         <div class="form-section" style="border-left: 4px solid var(--warning-text); margin-top: 15px; background: #FFF3E0;">
             <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleSeccionOfertas()">
-                <h3 style="color: var(--warning-text); margin:0;">🏷️ Generador de Ofertas (Próximos a Vencer) <span id="iconoFlechaOfertas" style="font-size: 0.9rem;">▼</span></h3>
+                <h3 style="color: var(--warning-text); margin:0;">
+🏷️ Generador de Ofertas (Próximos a Vencer) <span id="iconoFlechaOfertas" style="font-size: 0.9rem;">▼</span></h3>
                 <button class="btn" style="background-color: var(--warning-text); width: auto; padding: 8px 12px; font-size: 0.8rem; margin-top:0;" onclick="event.stopPropagation(); generarOfertasRecuperacion()">🔥 Crear Ofertas Flash</button>
             </div>
 
-            <div id="cuerpoOfertasRetractil" style="display: none; margin-top: 12px; border-top: 1px dashed #d08800; padding-top: 10px;">
+            <div id="cuerpoOfertasRetractil" style="display: none; margin-top: 
+12px; border-top: 1px dashed #d08800; padding-top: 10px;">
                 <p style="font-size: 0.85rem; color: #555; margin-top: 0;">Crea automáticamente precios especiales de recuperación para productos próximos a vencer y armar campañas de WhatsApp.</p>
 
                 <div id="resultadoOfertasContainer" style="margin-top: 10px; background: white; padding: 12px; border-radius: 6px; display: none; border: 1px solid var(--border);">
                     <div id="contenidoOfertasTexto"></div>
-                    <button class="btn" style="background-color: #25D366; margin-top: 10px;" onclick="enviarOfertasWhatsApp()">📱 Compartir Ofertas por WhatsApp</button>
+                    <button class="btn" 
+style="background-color: #25D366; margin-top: 10px;" onclick="enviarOfertasWhatsApp()">📱 Compartir Ofertas por WhatsApp</button>
                 </div>
             </div>
         </div>
@@ -737,7 +798,8 @@
         <div class="form-section" style="border-left: 4px solid var(--accent); margin-top: 15px; background: #E3F2FD;">
             <h3 style="color: var(--primary); margin-top:0;">🔍 Filtrar Reporte por Rango de Fechas</h3>
             <div class="row">
-                <div class="form-group col">
+                <div class="form-group 
+col">
                     <label for="filtroFechaDesde">Desde:</label>
                     <input type="date" id="filtroFechaDesde">
                 </div>
@@ -752,13 +814,15 @@
             </div>
             <div id="resultadoFiltroContainer" style="margin-top: 12px; background: white; padding: 10px; border-radius: 6px; display: none;">
                 <strong>Resultado del Rango Seleccionado:</strong>
-                <div>• Total Ventas: <strong id="filtroTotalVenta" style="color: var(--success);">Q0.00</strong></div>
+                <div>• Total 
+Ventas: <strong id="filtroTotalVenta" style="color: var(--success);">Q0.00</strong></div>
                 <div>• Ganancia Neta: <strong id="filtroTotalGanancia" style="color: var(--primary);">Q0.00</strong></div>
             </div>
         </div>
 
         <div class="form-section" style="border-left: 4px solid var(--primary); margin-top: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 
+8px;">
                 <h3 style="color: var(--primary); margin:0;">📅 Ventas y Ganancias por Día</h3>
                 <button class="btn" style="background-color: var(--primary); width: auto; padding: 8px 12px; font-size: 0.8rem; margin-top:0;" onclick="exportarPdfDias()">📄 Descargar PDF Diario</button>
             </div>
@@ -837,7 +901,8 @@
         </div>
 
         <div class="form-section" style="border-left: 4px solid var(--primary); margin-top: 15px;">
-            <h3 style="color: var(--primary);">📋 Resumen de Ventas de Hoy</h3>
+            <h3 style="color: 
+var(--primary);">📋 Resumen de Ventas de Hoy</h3>
             <div class="tabla-scroll">
                 <table id="tablaResumenVentas">
                     <thead>
@@ -848,7 +913,8 @@
                         </tr>
                     </thead>
                     <tbody id="listaResumenVentas">
-                        <tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy.</td></tr>
+                        <tr><td colspan="3" style="text-align:center; 
+color:#777;">Aún no hay ventas registradas hoy.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -892,12 +958,14 @@
         <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 
-    <!-- PESTAÑA 4: CONFIGURACIÓN / PIN, SUCURSALES Y RESPALDO -->
+    <!-- PESTAÑA 4: CONFIGURACIÓN / PIN, 
+SUCURSALES Y RESPALDO -->
     <div id="tab-configuracion" class="tab-content">
         <div class="form-section" style="border-left: 4px solid var(--accent);">
             <h3 style="color: var(--primary);">🏪 Administrar Sucursales de la Farmacia</h3>
             <p style="font-size: 0.85rem; color: #666; text-align: center;">Agrega o elimina sucursales para organizar inventario, ventas y reportes por local. Al eliminar una sucursal de prueba, puedes vaciar también sus datos en Firebase.</p>
-            <div class="form-group" style="margin-top: 12px;">
+            <div class="form-group" 
+style="margin-top: 12px;">
                 <label for="nuevaNombreSucursal">Nombre de la Nueva Sucursal:</label>
                 <input type="text" id="nuevaNombreSucursal" placeholder="Ej. PRUEBA - Temporal">
             </div>
@@ -908,7 +976,8 @@
                 <select id="selectorEliminarSucursal" style="background: white; margin-bottom: 8px;">
                     <option value="Farmacia FarmApp POS - Principal">Farmacia FarmApp POS - Principal</option>
                 </select>
-                <button class="btn" style="background-color: var(--danger);" onclick="eliminarSucursal()">🗑️ Eliminar Sucursal Seleccionada</button>
+                <button class="btn" style="background-color: var(--danger);" onclick="eliminarSucursal()">🗑️ 
+Eliminar Sucursal Seleccionada</button>
             </div>
         </div>
 
@@ -932,7 +1001,8 @@
             <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
                 <label for="archivoRespaldo" style="font-size: 0.85rem; color: #333;">Subir archivo de respaldo (.json):</label>
                 <input type="file" id="archivoRespaldo" accept=".json" style="margin-top: 5px; font-size: 0.8rem;">
-                <button class="btn" id="btnCargarRespaldo" style="background-color: #EF6C00; margin-top: 8px;" onclick="cargarRespaldoInventario()">📤 Restaurar / Cargar Respaldo</button>
+                <button class="btn" id="btnCargarRespaldo" style="background-color: #EF6C00; margin-top: 8px;" onclick="cargarRespaldoInventario()">📤 Restaurar / 
+Cargar Respaldo</button>
             </div>
         </div>
 
@@ -984,11 +1054,15 @@
     } catch (err) {
         console.error("Error al inicializar Firebase:", err);
         document.getElementById('syncStatus').innerHTML = "❌ Error crítico al inicializar Firebase";
-        document.getElementById('syncStatus').style.background = "#FFEBEE";
+        document.getElementById('syncStatus').style.background = 
+"#FFEBEE";
         document.getElementById('syncStatus').style.color = "#C62828";
     }
 
     const SUCURSAL_DEFAULT = "Farmacia FarmApp POS - Principal";
+    const CLAVE_VENTAS_PENDIENTES = "farmapp_ventas_pendientes_v1";
+    const CLAVE_SUCURSALES_CACHE = "farmapp_sucursales_cache_v1";
+
     let sucursalesDisponibles = [SUCURSAL_DEFAULT];
     let sucursalActual = localStorage.getItem("farmapp_sucursal_activa") || SUCURSAL_DEFAULT;
     let sucursalReporteFiltro = sucursalActual;
@@ -1002,7 +1076,8 @@
     let mapaPorCodigo = new Map();
     const LIMITE_FILAS_TABLA = 60;
     let limiteActualInventario = LIMITE_FILAS_TABLA;
-    let limiteActualVentas = LIMITE_FILAS_TABLA;
+    let limiteActualVentas = 
+LIMITE_FILAS_TABLA;
 
     let carrito = [];
     let historialVentasDia = [];
@@ -1019,6 +1094,7 @@
     let textoUltimasOfertasGeneradas = "";
     let reportesDesactualizados = true;
     let procesandoVenta = false;
+    let sincronizandoColaOffline = false;
 
     let streamEscanerActivo = null;
     let intervaloDetectorNativo = null;
@@ -1026,7 +1102,298 @@
     let timeoutEnfriamiento = null;
     let audioCtxBeep = null;
 
-    function conTimeout(promesa, ms = 12000, mensaje = "Tiempo de espera agotado con Firebase") {
+    function obtenerFechaLocalISO(date = new Date()) {
+        const año = date.getFullYear();
+        const mes = 
+String(date.getMonth() + 1).padStart(2, '0');
+        const dia = String(date.getDate()).padStart(2, '0');
+        return `${año}-${mes}-${dia}`;
+    }
+
+    function obtenerMesLocalISO(date = new Date()) {
+        const año = date.getFullYear();
+        const mes = String(date.getMonth() + 1).padStart(2, '0');
+        return `${año}-${mes}`;
+    }
+
+    function guardarCacheSucursalesLocal(lista) {
+        try {
+            localStorage.setItem(CLAVE_SUCURSALES_CACHE, JSON.stringify(lista || []));
+        } catch (e) {}
+    }
+
+    function leerCacheSucursalesLocal() {
+        try {
+            const raw = localStorage.getItem(CLAVE_SUCURSALES_CACHE);
+            const parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) 
+&& parsed.length > 0 ? parsed : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function obtenerClaveCacheInventario(sucursal) {
+        return `farmapp_inv_cache_${encodeURIComponent(sucursal)}`;
+    }
+
+    function guardarCacheInventarioLocal(sucursal, lista) {
+        try {
+            const limpio = (lista || []).map(({ _busqueda, ...rest }) => rest);
+            localStorage.setItem(obtenerClaveCacheInventario(sucursal), JSON.stringify(limpio));
+        } catch (e) {
+            console.warn("No se pudo guardar caché local de inventario:", e);
+        }
+    }
+
+    function leerCacheInventarioLocal(sucursal) {
+        try {
+            const raw = 
+localStorage.getItem(obtenerClaveCacheInventario(sucursal));
+            const parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function leerVentasPendientes() {
+        try {
+            const raw = localStorage.getItem(CLAVE_VENTAS_PENDIENTES);
+            const parsed = raw ? JSON.parse(raw) : [];
+            return 
+Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function guardarVentasPendientes(lista) {
+        try {
+            localStorage.setItem(CLAVE_VENTAS_PENDIENTES, JSON.stringify(lista || []));
+        } catch (e) {
+            console.warn("No se pudo guardar la cola de ventas pendientes:", e);
+        }
+        
+actualizarBarraPendientesOffline();
+    }
+
+    function actualizarBarraPendientesOffline() {
+        const pendientes = leerVentasPendientes();
+        const barra = document.getElementById('barraPendientesOffline');
+        const texto = document.getElementById('textoPendientesOffline');
+        if (!barra || !texto) return;
+
+        if (pendientes.length > 0) {
+            barra.style.display = 'flex';
+            texto.innerHTML = `⏳ 
+Ventas guardadas sin conexión pendientes de subir: <strong>${pendientes.length}</strong>`;
+        } else {
+            barra.style.display = 'none';
+        }
+    }
+
+    function actualizarEstadoConexionUI(mensajeExtra = "") {
+        const statusDiv = document.getElementById('syncStatus');
+        if (!statusDiv) return;
+        const pendientes = leerVentasPendientes().length;
+        const sufijoPend = pendientes > 0 ? ` | ⏳ ${pendientes} venta(s) 
+pendiente(s)` : "";
+
+        if (!navigator.onLine) {
+            statusDiv.innerHTML = `📴 Sin conexión a Internet — Modo local activo (${inventarioGlobal.length.toLocaleString()} prod. en ${sucursalActual})${sufijoPend}`;
+            statusDiv.style.background = "#FFF3E0";
+            statusDiv.style.color = "#E65100";
+        } else if (mensajeExtra) {
+            statusDiv.innerHTML = `${mensajeExtra}${sufijoPend}`;
+        }
+    }
+
+    function indexarInventarioEnMemoria(listaSucursal) {
+        inventarioGlobal = listaSucursal;
+        const nuevoMapa = new Map();
+        const nuevoMapaCodigo = new Map();
+
+        listaSucursal.forEach(item => {
+            nuevoMapa.set(item.id, item);
+            const codLimpio = String(item.codigo || "").trim();
+            if (codLimpio && !nuevoMapaCodigo.has(codLimpio)) {
+                
+nuevoMapaCodigo.set(codLimpio, item);
+            }
+        });
+
+        mapaInventario = nuevoMapa;
+        mapaPorCodigo = nuevoMapaCodigo;
+    }
+
+    function cargarInventarioDesdeCacheLocal(nombreSucursal) {
+        const cached = leerCacheInventarioLocal(nombreSucursal);
+        if (cached.length === 0) return false;
+
+        const preparados = cached.map(raw => {
+            const sucursalNorm = normalizarSucursalDoc(raw);
+            return {
+                ...raw,
+                sucursal: sucursalNorm,
+                _busqueda: `${raw.nombre || ""} ${raw.codigo || ""} ${raw.estante || ""} ${raw.proveedor || ""} ${sucursalNorm}`.toLowerCase()
+            };
+        });
+
+        indexarInventarioEnMemoria(preparados);
+        if (sucursalReporteFiltro === 
+nombreSucursal) {
+            inventarioReporteFiltrado = preparados;
+        }
+        if (document.getElementById('tab-ventas').classList.contains('active')) {
+            renderizarVentas(inventarioGlobal);
+        }
+        if (document.getElementById('tab-inventario').classList.contains('active')) {
+            renderizarInventario(inventarioGlobal);
+            actualizarResumenInventari
+o(inventarioGlobal);
+        }
+        actualizarEstadoConexionUI();
+        return true;
+    }
+
+    window.sincronizarVentasPendientes = async function(mostrarAlerta = false) {
+        if (sincronizandoColaOffline || !navigator.onLine) {
+            if (mostrarAlerta && !navigator.onLine) {
+                alert("Aún no hay conexión a Internet para sincronizar las ventas pendientes.");
+            }
+            return;
+        }
+
+        const pendientes = leerVentasPendientes();
+        if (pendientes.length === 0) {
+            actualizarBarraPendientesOffline();
+            if (mostrarAlerta) alert("No hay ventas pendientes por sincronizar.");
+            return;
+        }
+
+        sincronizandoColaOffline = true;
+        const btnSync = document.getElementById('btnSinc
+ronizarPendientes');
+        if (btnSync) {
+            btnSync.disabled = true;
+            btnSync.innerText = "⏳ Subiendo...";
+        }
+
+        const restantes = [];
+        let subidas = 0;
+
+        for (const venta of pendientes) {
+            try {
+                const batch = writeBatch(db);
+                const descuentos = Array.isArray(venta.descuentos) ? venta.descuentos : [];
+
+                for (const desc of descuentos) {
+                    const prodRef = doc(db, "inventario_farmacia", desc.prodId);
+                    const snapProd = await conTimeout(getDoc(prodRef), 8000, "Tiempo agotado al leer producto");
+                    if (snapProd.exists()) {
+                        const dataProd = snapProd.data();
+                        const stockActual = Number(dataProd.cantidad) || 0;
+                        const vendidosActual = Number(dataProd.vendidos) || 0;
+                        const unidDesc = Number(desc.unidades) || 0;
+                        batch.update(prodRef, {
+                            cantidad: Math.max(0, stockActual - unidDesc),
+                            vendidos: vendidosActual + unidDesc
+                        });
+                    }
+                }
+
+                const { idLocal, descuentos: _d, ...docVenta } = venta;
+                const nuevaVentaRef = doc(collection(db, "ventas_farmacia"));
+                batch.set(nuevaVentaRef, 
+docVenta);
+
+                await conTimeout(batch.commit(), 10000, "Tiempo agotado al subir venta pendiente");
+                subidas++;
+            } catch (err) {
+                console.warn("Venta pendiente aún no sincronizada:", venta.idLocal, err);
+                restantes.push(venta);
+            }
+        }
+
+        guardarVentasPendientes(restantes);
+        sincronizandoColaOffline = 
+false;
+
+        if (btnSync) {
+            btnSync.disabled = false;
+            btnSync.innerText = "☁️ Sincronizar Ahora";
+        }
+
+        if (subidas > 0) {
+            actualizarEstadoConexionUI(`✅ Sincronizadas ${subidas} venta(s) pendiente(s) con Firebase`);
+            if (mostrarAlerta) {
+                alert(`Se sincronizaron ${subidas} venta(s) pendiente(s) con la nube.`);
+            }
+        } else if (mostrarAlerta) {
+            alert("No fue posible subir las ventas pendientes en este momento. Se reintentará automáticamente.");
+        }
+    }
+
+    window.addEventListener('online', () => {
+        actualizarEstadoConexionUI("🔄 Conexión recuperada, sincronizando pendientes...");
+        sincronizarVentasPendientes(false);
+    });
+
+    window.addEventListener('offline', () => {
+        actualizarEstadoConexionUI();
+    });
+
+    function obtenerPreciosYFactorProducto(prod) {
+        const tipoEmpaque = prod.tipoEmpaque === 'Caja' ? 'Caja' : 'Unidad';
+        const unidPorCaja = Math.max(1, parseInt(prod.unidadesPorCaja) || 1);
+        const ventaBase = 
+Number(prod.precioVenta) || 0;
+        const costoBase = Number(prod.precioCosto) || 0;
+
+        if (tipoEmpaque === 'Caja' && unidPorCaja > 1) {
+            const precioCaja = Number(prod.precioCaja) > 0 ? Number(prod.precioCaja) : ventaBase;
+            const precioUnitario = Number(prod.precioUnidad) > 0 ? Number(prod.precioUnidad) : (precioCaja / unidPorCaja);
+            const costoCaja = Number(prod.costoCaja) > 0 ? Number(prod.costoCaja) : costoBase;
+            const costoUnitario = Number(prod.costoUnitario) > 0 ? Number(prod.costoUnitario) : (costoCaja / unidPorCaja);
+            return {
+                tipoEmpaque,
+                unidPorCaja,
+                tieneVentaPorCaja: true,
+                precioUnidad: precioUnitario,
+                precioCaja: precioCaja,
+                costoUnidad: costoUnitario,
+                costoCaja: costoCaja
+            };
+        }
+
+        return {
+            tipoEmpaque: 'Unidad',
+            unidPorCaja: 1,
+            tieneVentaPorCaja: false,
+            precioUnidad: ventaBase,
+            precioCaja: ventaBase * unidPorCaja,
+            costoUnidad: costoBase,
+            costoCaja: costoBase * unidPorCaja
+        };
+    }
+
+    function formatearStockDetallado(prod) {
+        const stock = Number(prod.cantidad) || 0;
+        const info = obtenerPreciosYFactorProducto(prod);
+        if (info.tieneVentaPorCaja) {
+            const cajasCompletas = Math.floor(stock / info.unidPorCaja);
+            const unidadesSueltas = stock % info.unidPorCaja;
+            if (unidadesSueltas > 0) {
+                return `${stock} u. (${cajasCompletas} caja(s) + ${unidadesSueltas} u.)`;
+            }
+            return `${stock} u. (${cajasCompletas} caja(s))`;
+        }
+        return `${stock} u.`;
+    }
+
+    function conTimeout(promesa, 
+ms = 12000, mensaje = "Tiempo de espera agotado con Firebase") {
         return new Promise((resolve, reject) => {
             const timer = setTimeout(() => reject(new Error(mensaje)), ms);
             promesa.then(
@@ -1045,7 +1412,8 @@
         const data = docSnap.data();
         const sucursalNorm = normalizarSucursalDoc(data);
         const item = { id: docSnap.id, ...data, sucursal: sucursalNorm };
-        item._busqueda = `${item.nombre || ""} ${item.codigo || ""} ${item.estante || ""} ${item.proveedor || ""} ${sucursalNorm}`.toLowerCase();
+        item._busqueda = `${item.nombre || ""} ${item.codigo || ""} ${item.estante || ""} $
+{item.proveedor || ""} ${sucursalNorm}`.toLowerCase();
         return item;
     }
 
@@ -1053,7 +1421,8 @@
         const invLbl = document.getElementById('etiquetaSucursalInventario');
         const venLbl = document.getElementById('etiquetaSucursalVentas');
         const badgeVen = document.getElementById('badgeSucursalVentas');
-        const ticketLbl = document.getElementById('etiquetaSucursalTicket');
+        const ticketLbl = document.getElementById('etiqueta
+SucursalTicket');
         const corLbl = document.getElementById('etiquetaSucursalCorte');
         if (invLbl) invLbl.innerText = sucursalActual;
         if (venLbl) venLbl.innerText = sucursalActual;
@@ -1062,7 +1431,8 @@
         if (corLbl) corLbl.innerText = sucursalReporteFiltro;
     }
 
-    function renderizarSelectoresSucursales(filtroTexto = "") {
+    function renderizarSelector
+esSucursales(filtroTexto = "") {
         const selActiva = document.getElementById('selectorSucursalActiva');
         const selRep = document.getElementById('filtroSucursalReporte');
         const selEliminar = document.getElementById('selectorEliminarSucursal');
@@ -1070,7 +1440,8 @@
 
         if (selActiva) {
             selActiva.innerHTML = "";
-            sucursalesDisponibles.forEach(nombre => {
+            sucursalesDisponibles.forEach(nombre => 
+{
                 const opt = document.createElement("option");
                 opt.value = nombre;
                 opt.textContent = nombre;
@@ -1082,7 +1453,8 @@
         if (selEliminar) {
             const valorPrevioEliminar = selEliminar.value;
             selEliminar.innerHTML = "";
-            sucursalesDisponibles.forEach(nombre => {
+            sucursalesDisponibles.forEach(nombre => 
+{
                 const opt = document.createElement("option");
                 opt.value = nombre;
                 opt.textContent = nombre;
@@ -1093,7 +1465,8 @@
 
         if (selRep) {
             const coincidencias = querySuc
-                ? sucursalesDisponibles.filter(n => n.toLowerCase().includes(querySuc))
+                ? sucursalesDisponibles.filter(n => n.t
+oLowerCase().includes(querySuc))
                 : sucursalesDisponibles;
             const listaOpciones = coincidencias.length > 0 ? coincidencias : sucursalesDisponibles;
 
@@ -1114,7 +1487,8 @@
     }
 
     window.filtrarSelectorSucursalesReporte = function() {
-        const texto = document.getElementById('buscadorSucursalReporte').value || "";
+        const texto = 
+document.getElementById('buscadorSucursalReporte').value || "";
         renderizarSelectoresSucursales(texto);
         cambiarSucursalReporte(document.getElementById('filtroSucursalReporte').value);
     }
@@ -1136,20 +1510,9 @@
                 listaSucursal.push(prepararProducto(docSnap));
             });
 
-            inventarioGlobal = listaSucursal;
-            const nuevoMapa = new Map();
-            const nuevoMapaCodigo = new Map();
-
-            listaSucursal.forEach(item => {
-                nuevoMapa.set(item.id, item);
-                const codLimpio = String(item.codigo || "").trim();
-                if (codLimpio && !nuevoMapaCodigo.has(codLimpio)) {
-                    nuevoMapaCodigo.set(codLimpio, item);
-                }
-            });
-
-            mapaInventario = nuevoMapa;
-            mapaPorCodigo = nuevoMapaCodigo;
+            indexarInventarioEnMemori
+a(listaSucursal);
+            guardarCacheInventarioLocal(nombreSucursal, listaSucursal);
 
             if (sucursalReporteFiltro === nombreSucursal) {
                 inventarioReporteFiltrado = listaSucursal;
@@ -1165,19 +1528,30 @@
             }
             if (document.getElementById('tab-inventario').classList.contains('active')) {
                 renderizarInventario(inventarioGlobal);
-                actualizarResumenInventario(inventarioGlobal);
+                
+actualizarResumenInventario(inventarioGlobal);
             }
 
+            const pendientes = leerVentasPendientes().length;
+            const sufijoPend = pendientes > 0 ? ` | ⏳ ${pendientes} pendiente(s)` : "";
             const statusDiv = document.getElementById('syncStatus');
-            statusDiv.innerHTML = `✅ Conectado (${inventarioGlobal.length.toLocaleString()} prod. en ${sucursalActual})`;
+            statusDiv.innerHTML = `✅ Conectado (${inventarioGlobal.length.toLocaleString()} prod. en ${sucursalActual})${sufijoPend}`;
             statusDiv.style.background = "#E8F5E9";
-            statusDiv.style.color = "#2E7D32";
+            statusDiv.style.color = 
+"#2E7D32";
+
+            if (pendientes > 0 && navigator.onLine) {
+                sincronizarVentasPendientes(false);
+            }
         }, (error) => {
             console.error("Error al sincronizar inventario: ", error);
-            const statusDiv = document.getElementById('syncStatus');
-            statusDiv.innerHTML = `⚠️ Error de conexión con la nube: ${error.code || error.message}`;
-            statusDiv.style.background = "#FFEBEE";
-            statusDiv.style.color = "#C62828";
+            if (!cargarInventarioDesdeCacheLocal(nombreSucursal)) {
+                const statusDiv = document.getElementById('syncStatus');
+                statusDiv.innerHTML = `⚠️ Error de conexión con la nube: ${error.code || error.message}`;
+                
+statusDiv.style.background = "#FFEBEE";
+                statusDiv.style.color = "#C62828";
+            }
         });
     }
 
@@ -1187,20 +1561,23 @@
             unsubscribeVentas = null;
         }
 
-        const qVentas = query(
-            collection(db, "ventas_farmacia"),
-            where("sucursal", "==", nombreSucursalRep),
-            orderBy("fechaHora", "desc"),
-            limit(400)
-        );
-
-        unsubscribeVentas = onSnapshot(qVentas, (snapshot) => {
+        const procesarSnapshotVentas = (snapshot) => {
             const lista = [];
-            snapshot.forEach((docSnap) => {
+            snapshot.forEach((docSnap) 
+=> {
                 lista.push({ id: docSnap.id, ...docSnap.data() });
             });
 
-            ventasHistoricasGlobal = lista;
+            const pendientesSucursal = leerVentasPendientes().filter(
+                v => normalizarSucursalDoc(v) === nombreSucursalRep
+            );
+
+            const combinadas = [...pendientesSucursal, ...lista].sort((a, b) =>
+                String(b.fechaHora || b.fecha || "").localeCompare(String(a.fechaHora || a.fecha || 
+""))
+            );
+
+            ventasHistoricasGlobal = combinadas;
             sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
 
             if (document.getElementById('tab-reportes').classList.contains('active')) {
@@ -1208,12 +1585,30 @@
             } else {
                 reportesDesactualizados = true;
             }
-        }, (error) => {
-            console.error("Error al sincronizar ventas (revisa si Firestore pide crear el índice compuesto):", error);
+        };
+
+        const qOrdenada = query(
+            collection(db, "ventas_farmacia"),
+            where("sucursal", "==", nombreSucursalRep),
+            orderBy("fechaHora", "desc"),
+            limit(400)
+        );
+
+        unsubscribeVentas = onSnapshot(qOrdenada, procesarSnapshotVentas, (error) => {
+            console.warn("Fallback sin 
+orderBy en ventas_farmacia:", error);
+            const qSimple = query(
+                collection(db, "ventas_farmacia"),
+                where("sucursal", "==", nombreSucursalRep)
+            );
+            unsubscribeVentas = onSnapshot(qSimple, procesarSnapshotVentas, (err2) => {
+                console.error("Error al leer ventas de la sucursal:", err2);
+            });
         });
     }
 
-    window.cambiarSucursalActiva = function(nuevaSucursal) {
+    window.cambiarSucursalActiva = 
+function(nuevaSucursal) {
         if (!nuevaSucursal) return;
         sucursalActual = nuevaSucursal;
         localStorage.setItem("farmapp_sucursal_activa", sucursalActual);
@@ -1227,11 +1622,13 @@
             sucursalReporteFiltro = sucursalActual;
         }
         renderizarSelectoresSucursales(document.getElementById('buscadorSucursalReporte')?.value || "");
+        cargarInventarioDesdeCacheLocal(sucursalActual);
         suscribirInventarioSucursal(sucursalActual);
 
         if (sucursalReporteFiltro === sucursalActual) {
             suscribirVentasSucursal(sucursalReporteFiltro);
-        }
+        
+}
     }
 
     window.cambiarSucursalReporte = async function(nuevaSucursalRep) {
@@ -1242,23 +1639,63 @@
         if (sucursalReporteFiltro === sucursalActual) {
             inventarioReporteFiltrado = inventarioGlobal;
         } else {
-            const snapInvRep = await getDocs(
-                query(collection(db, "inventario_farmacia"), where("sucursal", "==", sucursalReporteFiltro))
-            );
-            inventarioReporteFiltrado = snapInvRep.docs.map(d => prepararProducto(d));
+            const cachedRep = leerCacheInventarioLocal(sucursalReporteFiltro);
+            if (cachedRep.length > 0) {
+                inventarioReporteFiltrado = cachedRep.map(raw => {
+                    const sucursalNorm = normalizarSucursalDoc(raw);
+                    return {
+                        ...raw,
+                        sucursal: sucursalNorm,
+                        _busqueda: `${raw.nombre || ""} ${raw.codigo || ""} ${raw.estante || ""} ${raw.proveedor || ""} ${sucursalNorm}`.toLowerCase()
+                    };
+                });
+            }
+            if (navigator.onLine) {
+                try {
+                    const snapInvRep = await getDocs(
+                        query(collection(db, "inventario_farmacia"), where("sucursal", "==", sucursalReporteFiltro))
+                    );
+                    const listaFresca = snapInvRep.docs.map(d => prepararProducto(d));
+                    inventarioReporteFiltrado = listaFresca;
+                    guardarCacheInventarioLocal(sucursalReporteFiltro, listaFresca);
+                } catch (e) {
+                    console.warn("No se 
+pudo actualizar inventario de sucursal de reporte en red:", e);
+                }
+            }
         }
 
         suscribirVentasSucursal(sucursalReporteFiltro);
 
         if (document.getElementById('tab-reportes').classList.contains('active')) {
             actualizarReportesInventario(inventarioReporteFiltrado);
-            renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+            
+renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
             reportesDesactualizados = false;
         }
     }
 
     async function cargarSucursales() {
-        try {
+        actualizarBarraPendientesOffline();
+
+        const sucursalesCacheadas = leerCacheSucursalesLocal();
+        if (sucursalesCacheadas) {
+            sucursalesDisponibles = sucursalesCacheadas;
+            if (!sucursalesDisponibles.includes(sucursalActual)) 
+{
+                sucursalActual = sucursalesDisponibles[0];
+            }
+            if (!sucursalesDisponibles.includes(sucursalReporteFiltro)) {
+                sucursalReporteFiltro = sucursalActual;
+            }
+            renderizarSelectoresSucursales();
+        }
+
+        cargarInventarioDesdeCacheLocal(sucursalActual);
+        actualizarEstadoConexionUI();
+
+        try 
+{
             const sucRef = doc(db, "configuracion", "sucursales");
             const sucSnap = await getDoc(sucRef);
             if (sucSnap.exists() && Array.isArray(sucSnap.data().lista) && sucSnap.data().lista.length > 0) {
@@ -1266,9 +1703,12 @@
             } else {
                 await setDoc(sucRef, { lista: sucursalesDisponibles });
             }
+            guardarCacheSucursalesLocal(sucursalesDisponibles);
         } catch (e) {
-            console.error("Error al cargar sucursales:", e);
+            console.error("Error al cargar sucursales:", 
+e);
         }
+
         if (!sucursalesDisponibles.includes(sucursalActual)) {
             sucursalActual = sucursalesDisponibles[0];
         }
@@ -1276,7 +1716,8 @@
             sucursalReporteFiltro = sucursalActual;
         }
         renderizarSelectoresSucursales();
-        suscribirInventarioSucursal(sucursalActual);
+        
+suscribirInventarioSucursal(sucursalActual);
         suscribirVentasSucursal(sucursalReporteFiltro);
     }
     cargarSucursales();
@@ -1287,15 +1728,18 @@
         if (!nombre) {
             alert("Escribe el nombre de la nueva sucursal.");
             return;
-        }
+        
+}
         if (!sucursalesDisponibles.includes(nombre)) {
             sucursalesDisponibles.push(nombre);
+            guardarCacheSucursalesLocal(sucursalesDisponibles);
             try {
                 await setDoc(doc(db, "configuracion", "sucursales"), { lista: sucursalesDisponibles }, { merge: true });
             } catch (e) {
                 console.error("Error guardando sucursal:", e);
             }
-        }
+        
+}
         input.value = "";
         sucursalReporteFiltro = nombre;
         renderizarSelectoresSucursales();
@@ -1305,7 +1749,8 @@
 
     async function borrarDocumentosPorSucursal(nombreColeccion, nombreSucursal) {
         const q = query(collection(db, nombreColeccion), where("sucursal", "==", nombreSucursal));
-        const snap = await getDocs(q);
+        const snap = await 
+getDocs(q);
         let eliminados = 0;
 
         let batch = writeBatch(db);
@@ -1323,7 +1768,8 @@
             }
         }
 
-        if (opsEnBatch > 0) {
+        if (opsEnBatch > 0) 
+{
             await batch.commit();
         }
 
@@ -1337,7 +1783,8 @@
         if (!nombreEliminar) {
             alert("Selecciona una sucursal para eliminar.");
             return;
-        }
+        
+}
 
         if (sucursalesDisponibles.length <= 1) {
             alert("Debe existir al menos una sucursal registrada en el sistema.");
@@ -1384,7 +1831,8 @@
                 prodBorrados = await borrarDocumentosPorSucursal("inventario_farmacia", nombreEliminar);
                 ventasBorradas = await borrarDocumentosPorSucursal("ventas_farmacia", nombreEliminar);
             } catch (err) {
-                console.error("Error al borrar datos de la sucursal en Firebase:", err);
+                console.error("Error al borrar datos de la sucursal en 
+Firebase:", err);
                 alert("Ocurrió un error al eliminar los documentos en Firebase. Revisa la consola o las reglas de seguridad.");
                 return;
             }
@@ -1392,6 +1840,7 @@
 
         const nuevaLista = sucursalesDisponibles.filter(s => s !== nombreEliminar);
         sucursalesDisponibles = nuevaLista.length > 0 ? nuevaLista : [SUCURSAL_DEFAULT];
+        guardarCacheSucursalesLocal(sucursalesDisponibles);
 
         try {
             await setDoc(doc(db, "configuracion", "sucursales"), { lista: sucursalesDisponibles });
@@ -1400,6 +1849,8 @@
             alert("No se pudo actualizar la lista de sucursales en la nube.");
             return;
         }
+
+        localStorage.removeItem(obtenerClaveCacheInventario(nombreEliminar));
 
         const siguienteSucursal = sucursalesDisponibles[0];
         if (sucursalReporteFiltro === nombreEliminar) {
@@ -1412,7 +1863,8 @@
             renderizarCarrito();
         }
 
-        renderizarSelectoresSucursales(document.getElementById('buscadorSucursalReporte')?.value || "");
+        renderizarSelectoresSucursales(document.getElementById('busc
+adorSucursalReporte')?.value || "");
         suscribirInventarioSucursal(sucursalActual);
         suscribirVentasSucursal(sucursalReporteFiltro);
 
@@ -1453,7 +1905,7 @@
     }
 
     function sincronizarCorteHoyDesdeVentas(ventasLista) {
-        const hoyIso = new Date().toISOString().slice(0, 10);
+        const hoyIso = obtenerFechaLocalISO(new Date());
         const ventasHoy = ventasLista.filter(v => v.fecha === hoyIso).reverse();
 
         let ingresosHoy = 0;
@@ -1480,7 +1932,8 @@
         historialVentasDia = historialHoy;
 
         document.getElementById('corteIngresos').innerText = `Q${corteCajaIngresos.toFixed(2)}`;
-        document.getElementById('corteGanancia').innerText = `Q${corteCajaGanancia.toFixed(2)}`;
+        document.getElementById('corteGanancia').innerText = 
+`Q${corteCajaGanancia.toFixed(2)}`;
         document.getElementById('corteTotalVentas').innerText = corteCajaCantidad;
         recalcularCuadreTeorico();
         renderizarResumenVentasHoy();
@@ -1491,7 +1944,8 @@
             const configRef = doc(db, "configuracion", "seguridad");
             const configSnap = await getDoc(configRef);
             if (configSnap.exists()) {
-                pinActualSistema = configSnap.data().pin || "1234";
+                pinActualSistema = 
+configSnap.data().pin || "1234";
             } else {
                 await setDoc(configRef, { pin: "1234" });
                 pinActualSistema = "1234";
@@ -1504,7 +1958,8 @@
 
     window.actualizarPinAdmin = async function() {
         const nuevoPin = document.getElementById('nuevoPinAdmin').value.trim();
-        if (!nuevoPin || nuevoPin.length < 3) {
+        if (!nuevoPin || 
+nuevoPin.length < 3) {
             alert("Por favor ingrese un PIN válido (mínimo 3 dígitos).");
             return;
         }
@@ -1514,7 +1969,8 @@
             await setDoc(configRef, { pin: nuevoPin });
             pinActualSistema = nuevoPin;
             document.getElementById('nuevoPinAdmin').value = '';
-            alert("¡Contraseña / PIN de administrador actualizado con éxito en la nube!");
+            alert("¡Contraseña / PIN de administrador actualizado con 
+éxito en la nube!");
         } catch (e) {
             alert("Error al guardar el nuevo PIN en la nube.");
         }
@@ -1534,7 +1990,8 @@
 
     window.calcularDiferenciaCaja = function() {
         const efectivoTeorico = dineroFondoApertura + corteCajaIngresos;
-        const efectivoReal = parseFloat(document.getElementById('efectivoRealCierre').value) || 0;
+        const efectivoReal = parseFloat(document.getElementB
+yId('efectivoRealCierre').value) || 0;
         const diferencia = efectivoReal - efectivoTeorico;
 
         const lblDiferencia = document.getElementById('corteDiferencia');
@@ -1568,8 +2025,7 @@
 
         const filas = listaBase.map((p, idx) => {
             const stock = Number(p.cantidad) || 0;
-            const costo = Number(p.precioCosto) || 0;
-            const venta = Number(p.precioVenta) || 0;
+            const info = obtenerPreciosYFactorProducto(p);
             const estado = calcularEstado(p.vencimiento, stock);
 
             return {
@@ -1579,13 +2035,15 @@
                 "Lote": p.lote || "N/D",
                 "Estante": p.estante || "General",
                 "Proveedor": p.proveedor || "General",
-                "Tipo Empaque": p.tipoEmpaque || "Unidad",
-                "Unid. por Caja": p.tipoEmpaque === "Caja" ? (Number(p.unidadesPorCaja) || 1) : 1,
-                "Stock": stock,
-                "Costo Unitario (Q)": Number(costo.toFixed(2)),
-                "Precio Venta (Q)": Number(venta.toFixed(2)),
-                "Total Costo (Q)": Number((stock * costo).toFixed(2)),
-                "Total Venta (Q)": Number((stock * venta).toFixed(2)),
+                "Tipo Empaque": info.tipoEmpaque,
+                "Unid. por Caja": info.unidPorCaja,
+                "Stock (Unidades)": stock,
+                "Costo Unitario (Q)": Number(info.costoUnidad.toFixed(2)),
+                "Precio Venta Unit. (Q)": Number(info.precioUnidad.toFixed(2)),
+                "Precio Venta Caja (Q)": info.tieneVentaPorCaja ? Number(info.precioCaja.toFixed(2)) : 
+"",
+                "Total Costo (Q)": Number((stock * info.costoUnidad).toFixed(2)),
+                "Total Venta (Q)": Number((stock * info.precioUnidad).toFixed(2)),
                 "Vencimiento": p.vencimiento || "",
                 "Estado": estado.texto,
                 "Sucursal": p.sucursal || sucursalActual
@@ -1602,9 +2060,10 @@
             { wch: 20 },
             { wch: 14 },
             { wch: 14 },
-            { wch: 10 },
+            { wch: 14 },
             { wch: 16 },
-            { wch: 16 },
+            { wch: 18 },
+            { wch: 18 },
             { wch: 16 },
             { wch: 16 },
             { wch: 14 },
@@ -1615,12 +2074,13 @@
         const libro = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(libro, hoja, "Inventario");
 
-        const hoy = new Date().toISOString().slice(0, 10);
+        const hoy = obtenerFechaLocalISO(new Date());
         const sucursalLimpia = sucursalActual.replace(/[^a-zA-Z0-9_-]/g, "_");
         XLSX.writeFile(libro, `Inventario_${sucursalLimpia}_${hoy}.xlsx`);
     }
 
-    window.descargarRespaldoInventario = function() {
+    window.descargarRespa
+ldoInventario = function() {
         if (!inventarioGlobal || inventarioGlobal.length === 0) {
             alert("No hay productos en el inventario de la sucursal actual para respaldar.");
             return;
@@ -1632,13 +2092,14 @@
             const url = URL.createObjectURL(blob);
             const downloadAnchor = document.createElement('a');
             downloadAnchor.href = url;
-            const fecha = new Date().toISOString().slice(0, 10);
+            const fecha = obtenerFechaLocalISO(new Date());
             downloadAnchor.download = `respaldo_inventario_farmapp_${fecha}.json`;
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             document.body.removeChild(downloadAnchor);
             URL.revokeObjectURL(url);
-        } catch (err) {
+        } catch (err) 
+{
             alert("Error al generar el archivo de respaldo.");
         }
     }
@@ -1647,7 +2108,8 @@
         const inputArchivo = document.getElementById('archivoRespaldo');
         const btnCargar = document.getElementById('btnCargarRespaldo');
         if (!inputArchivo.files || inputArchivo.files.length === 0) {
-            alert("Por favor seleccione un archivo de respaldo .json primero.");
+            alert("Por favor seleccione un archivo de respaldo .json 
+primero.");
             return;
         }
 
@@ -1659,7 +2121,8 @@
             try {
                 productosCargados = JSON.parse(e.target.result);
                 if (!Array.isArray(productosCargados) || productosCargados.length === 0) {
-                    alert("El archivo no contiene un formato de inventario válido.");
+                    alert("El archivo no 
+contiene un formato de inventario válido.");
                     return;
                 }
             } catch (err) {
@@ -1692,15 +2155,17 @@
                             nombre: String(p.nombre || 'Producto sin nombre'),
                             lote: String(p.lote || 'N/D'),
                             estante: String(p.estante || 'General'),
-                            proveedor: String(p.proveedor || 'General'),
+                            proveedor: 
+String(p.proveedor || 'General'),
                             tipoEmpaque: p.tipoEmpaque === 'Caja' ? 'Caja' : 'Unidad',
                             unidadesPorCaja: parseInt(p.unidadesPorCaja) || 1,
                             cantidad: parseInt(p.cantidad) || 0,
                             precioCosto: parseFloat(p.precioCosto) || 0,
                             precioVenta: parseFloat(p.precioVenta) || 0,
-                            vencimiento: p.vencimiento || new Date().toISOString().slice(0, 10),
+                            vencimiento: p.vencimiento || obtenerFechaLocalISO(new Date()),
                             vendidos: parseInt(p.vendidos) || 0,
-                            actualizado: new Date().toISOString()
+                            actualizado: new 
+Date().toISOString()
                         });
                         contadorCargados++;
                     }
@@ -1711,7 +2176,8 @@
                 alert(`¡Respaldo cargado con éxito! Se registraron ${contadorCargados} productos en "${sucursalActual}".`);
                 inputArchivo.value = '';
             } catch (err) {
-                console.error("Error al subir respaldo:", err);
+                console.error("Error al 
+subir respaldo:", err);
                 alert(`Error al subir el respaldo: ${err.message || err}`);
             } finally {
                 if (btnCargar) {
@@ -1756,7 +2222,8 @@
         if (pestaña === 'inventario') {
             document.querySelectorAll('.tab-btn')[0].classList.add('active');
             document.getElementById('tab-inventario').classList.add('active');
-            renderizarInventario(inventarioGlobal);
+            renderizarInventario(invent
+arioGlobal);
             actualizarResumenInventario(inventarioGlobal);
         } else if (pestaña === 'ventas') {
             document.querySelectorAll('.tab-btn')[1].classList.add('active');
@@ -1764,21 +2231,35 @@
             renderizarVentas(inventarioGlobal);
         } else if (pestaña === 'reportes') {
             document.querySelectorAll('.tab-btn')[2].classList.add('active');
-            document.getElementById('tab-reportes').classList.add('active');
+            
+document.getElementById('tab-reportes').classList.add('active');
             if (sucursalReporteFiltro === sucursalActual) {
                 inventarioReporteFiltrado = inventarioGlobal;
             } else if (!inventarioReporteFiltrado || inventarioReporteFiltrado.length === 0) {
-                const snapInvRep = await getDocs(
-                    query(collection(db, "inventario_farmacia"), where("sucursal", "==", sucursalReporteFiltro))
-                );
-                inventarioReporteFiltrado = snapInvRep.docs.map(d => prepararProducto(d));
+                const cachedRep = leerCacheInventarioLocal(sucursalReporteFiltro);
+                if (cachedRep.length > 0) {
+                    inventarioReporteFiltrado = cachedRep.map(raw => {
+                        const sucursalNorm = normalizarSucursalDoc(raw);
+                        return {
+                            ...raw,
+                            sucursal: sucursalNorm,
+                            _busqueda: `${raw.nombre || ""} ${raw.codigo || ""} ${raw.estante || ""} ${raw.proveedor || ""} ${sucursalNorm}`.toLowerCase()
+                        };
+                    });
+                } else if (navigator.onLine) {
+                    const snapInvRep = await getDocs(
+                        query(collection(db, "inventario_farmacia"), where("sucursal", "==", sucursalReporteFiltro))
+                    );
+                    inventarioReporteFiltrado = snapInvRep.docs.map(d => prepararProducto(d));
+                }
             }
             if (reportesDesactualizados) {
                 actualizarReportesInventario(inventarioReporteFiltrado);
                 renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
                 reportesDesactualizados = false;
             }
-        } else if (pestaña === 'configuracion') {
+        } else if (pestaña === 
+'configuracion') {
             document.querySelectorAll('.tab-btn')[3].classList.add('active');
             document.getElementById('tab-configuracion').classList.add('active');
         }
@@ -1786,21 +2267,41 @@
 
     window.toggleUnidadesPorCaja = function() {
         const tipo = document.getElementById('tipoEmpaque').value;
-        const grupoCaja = document.getElementById('grupoUnidadesCaja');
+        const idEdicion = document.getElementById('editandoId').value;
+        const grupoCaja = 
+document.getElementById('grupoUnidadesCaja');
         const labelCant = document.getElementById('labelCantidad');
+        const ayudaCaja = document.getElementById('ayudaCantidadCaja');
+        const labelCosto = document.getElementById('labelCosto');
+        const labelVenta = document.getElementById('labelVenta');
+
         if (tipo === 'Caja') {
             grupoCaja.style.display = 'block';
-            labelCant.innerText = "Cantidad en Stock (Cajas):";
+            labelCosto.innerText = "Precio Costo de Caja 
+(Q):";
+            labelVenta.innerText = "Precio Venta de Caja (Q):";
+            if (!idEdicion) {
+                labelCant.innerText = "Cantidad en Stock (Cajas):";
+                if (ayudaCaja) ayudaCaja.style.display = 'block';
+            } else {
+                labelCant.innerText = "Cantidad en Stock (Unidades totales):";
+                if (ayudaCaja) ayudaCaja.style.display = 'none';
+            }
         } else {
             grupoCaja.style.display = 'none';
+            labelCosto.innerText = "Precio Costo 
+(Q):";
+            labelVenta.innerText = "Precio Venta (Q):";
             labelCant.innerText = "Cantidad en Stock (Unidades):";
+            if (ayudaCaja) ayudaCaja.style.display = 'none';
         }
     }
 
     window.toggleSeccionOfertas = function() {
         const cuerpo = document.getElementById('cuerpoOfertasRetractil');
         const flecha = document.getElementById('iconoFlechaOfertas');
-        if (cuerpo.style.display === 'none') {
+        if (cuerpo.style.display === 'none') 
+{
             cuerpo.style.display = 'block';
             flecha.innerText = '▲';
         } else {
@@ -1812,21 +2313,38 @@
     window.guardarProductoEnNube = async function() {
         const idEdicion = document.getElementById('editandoId').value;
         const codigo = document.getElementById('codigoBarras').value.trim();
-        const nombre = document.getElementById('nombreProducto').value.trim();
+        const nombre = 
+document.getElementById('nombreProducto').value.trim();
         const lote = document.getElementById('loteProducto').value.trim();
         const estante = document.getElementById('estanteProducto').value.trim();
         const proveedor = document.getElementById('proveedorProducto').value.trim();
         const tipoEmpaque = document.getElementById('tipoEmpaque').value;
-        const unidadesPorCaja = parseInt(document.getElementById('unidadesPorCaja').value) || 1;
-        const precioCosto = parseFloat(document.getElementById('costoProducto').value) || 0;
+        const unidadesPorCaja = Math.max(1, parseInt(document.getElementById('unidadesPorCaja').value) || 1);
+        const precioCosto = 
+parseFloat(document.getElementById('costoProducto').value) || 0;
         const precioVenta = parseFloat(document.getElementById('ventaProducto').value) || 0;
-        let cantidadIngresada = parseInt(document.getElementById('cantidadProducto').value) || 0;
+        const cantidadIngresada = parseInt(document.getElementById('cantidadProducto').value) || 0;
         const vencimiento = document.getElementById('vencimientoProducto').value;
 
         if (!codigo || !nombre || isNaN(cantidadIngresada) || !vencimiento) {
             alert("Por favor completa los campos obligatorios.");
             return;
         }
+
+        if (tipoEmpaque === 'Caja' && unidadesPorCaja <= 1) {
+            alert("Indica cuántas unidades trae cada caja (mayor a 1).");
+            return;
+        }
+
+        const esCajaConFraccion = tipoEmpaque === 'Caja' && unidadesPorCaja > 1;
+        const cantidadFinalUnidades = (!idEdicion && esCajaConFraccion)
+            ? (cantidadIngresada * unidadesPorCaja)
+            : cantidadIngresada;
+
+        const precioCaja = esCajaConFraccion ? precioVenta : (precioVenta * unidadesPorCaja);
+        const precioUnidad = esCajaConFraccion ? (precioVenta / unidadesPorCaja) : precioVenta;
+        const costoCaja = esCajaConFraccion ? precioCosto : (precioCosto * unidadesPorCaja);
+        const costoUnidad = esCajaConFraccion ? (precioCosto / unidadesPorCaja) : precioCosto;
 
         const btnGuardar = document.getElementById('btnGuardar');
         btnGuardar.disabled = true;
@@ -1841,13 +2359,18 @@
                     codigo,
                     nombre,
                     lote: lote || 'N/D',
-                    estante: estante || 'General',
+                    estante: estante || 
+'General',
                     proveedor: proveedor || 'General',
                     tipoEmpaque,
-                    unidadesPorCaja: tipoEmpaque === 'Caja' ? unidadesPorCaja : 1,
-                    cantidad: cantidadIngresada,
+                    unidadesPorCaja: esCajaConFraccion ? unidadesPorCaja : 1,
+                    cantidad: cantidadFinalUnidades,
                     precioCosto,
                     precioVenta,
+                    precioUnidad,
+                    precioCaja,
+                    costoUnidad,
+                    costoCaja,
                     vencimiento,
                     actualizado: new Date().toISOString()
                 }), 12000, "Tiempo agotado al actualizar producto");
@@ -1861,10 +2384,15 @@
                     estante: estante || 'General',
                     proveedor: proveedor || 'General',
                     tipoEmpaque,
-                    unidadesPorCaja: tipoEmpaque === 'Caja' ? unidadesPorCaja : 1,
-                    cantidad: cantidadIngresada,
+                    unidadesPorCaja: 
+esCajaConFraccion ? unidadesPorCaja : 1,
+                    cantidad: cantidadFinalUnidades,
                     precioCosto,
                     precioVenta,
+                    precioUnidad,
+                    precioCaja,
+                    costoUnidad,
+                    costoCaja,
                     vencimiento,
                     vendidos: 0,
                     actualizado: new Date().toISOString()
@@ -1886,7 +2414,7 @@
         }
     }
 
-    window.agregarAlCarrito = function(id) {
+    window.agregarAlCarrito = function(id, modoPresentacion = 'Unidad') {
         const producto = mapaInventario.get(id) || inventarioGlobal.find(p => p.id === id);
         if (!producto) return;
 
@@ -1902,41 +2430,78 @@
             }
         }
 
-        if (producto.cantidad <= 0) {
+        const stockDisponible = Number(producto.cantidad) || 0;
+        if (stockDisponible <= 0) {
             alert("El producto no tiene stock disponible.");
             return;
         }
 
-        const itemEnCarrito = carrito.find(item => item.id === id);
+        const info = obtenerPreciosYFactorProducto(producto);
+        const venderComoCaja = (modoPresentacion === 'Caja') && info.tieneVentaPorCaja;
+        const factorUnidades = venderComoCaja ? info.unidPorCaja : 1;
+        const precioCobro = venderComoCaja ? info.precioCaja : 
+info.precioUnidad;
+        const etiquetaPresentacion = venderComoCaja ? 'Caja' : 'Unidad';
+
+        const unidadesYaEnCarrito = carrito
+            .filter(item => item.id === id)
+            .reduce((acc, item) => acc + (item.cantidadReq * item.factorUnidades), 0);
+
+        if (unidadesYaEnCarrito + factorUnidades > stockDisponible) {
+            alert(
+                venderComoCaja
+                    ? `No hay suficientes unidades (${info.unidPorCaja} u.) para agregar otra caja completa de 
+"${producto.nombre}".`
+                    : "No hay más stock disponible para este producto."
+            );
+            return;
+        }
+
+        const itemEnCarrito = carrito.find(item => item.id === id && item.presentacionVenta === etiquetaPresentacion);
         if (itemEnCarrito) {
-            if (itemEnCarrito.cantidadReq < producto.cantidad) {
-                itemEnCarrito.cantidadReq++;
-            } else {
-                alert("No hay más stock disponible para este producto.");
-            }
+            itemEnCarrito.cantidadReq++;
+            itemEnCarrito.stockMax = stockDisponible;
+            itemEnCarrito.vendidosActuales = 
+Number(producto.vendidos) || 0;
         } else {
             carrito.push({
                 id: producto.id,
                 nombre: producto.nombre,
-                precio: Number(producto.precioVenta) || 0,
-                costo: Number(producto.precioCosto) || 0,
+                presentacionVenta: etiquetaPresentacion,
+                factorUnidades: factorUnidades,
+                precio: precioCobro,
+                costoUnitario: info.costoUnidad,
                 cantidadReq: 1,
-                stockMax: Number(producto.cantidad) || 0,
-                vendidosActuales: Number(producto.vendidos) || 0,
-                tipoEmpaque: producto.tipoEmpaque || 'Unidad'
+                stockMax: stockDisponible,
+                vendidosActuales: Number(producto.vendidos) || 0
             });
         }
         renderizarCarrito();
     }
 
     window.cambiarCantidadCarrito = function(index, delta) {
-        carrito[index].cantidadReq += delta;
-        if (carrito[index].cantidadReq <= 0) {
+        const item = carrito[index];
+        if (!item) return;
+
+        const nuevaCant = item.cantidadReq + delta;
+        if (nuevaCant <= 0) {
             carrito.splice(index, 1);
-        } else if (carrito[index].cantidadReq > carrito[index].stockMax) {
-            carrito[index].cantidadReq = carrito[index].stockMax;
-            alert("Alcanzaste el límite del stock disponible.");
+            renderizarCarrito();
+            return;
         }
+
+        const 
+otrasUnidadesMismoProd = carrito
+            .filter((otro, idx) => idx !== index && otro.id === item.id)
+            .reduce((acc, otro) => acc + (otro.cantidadReq * otro.factorUnidades), 0);
+
+        const unidadesSolicitadas = nuevaCant * item.factorUnidades;
+        if (otrasUnidadesMismoProd + unidadesSolicitadas > item.stockMax) {
+            alert("Alcanzaste el límite del stock disponible para este producto.");
+            return;
+        }
+
+        item.cantidadReq = nuevaCant;
         renderizarCarrito();
     }
 
@@ -1950,7 +2515,8 @@
         let total = 0;
 
         if (carrito.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">El carrito está vacío</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; 
+color:#777;">El carrito está vacío</td></tr>`;
             document.getElementById('totalCarrito').innerText = "Q0.00";
             document.getElementById('textoVuelto').innerText = "Q0.00";
             return;
@@ -1960,17 +2526,22 @@
         carrito.forEach((item, index) => {
             const subtotal = item.precio * item.cantidadReq;
             total += subtotal;
-            const unidadTexto = item.tipoEmpaque === 'Caja' ? ' caja(s)' : ' u.';
+            const esCaja = item.presentacionVenta === 'Caja';
+            const unidadTexto = esCaja ? ' caja(s)' : ' u.';
+            const detalleFraccion = esCaja ? ` <small style="color:#0D47A1;">(${item.cantidadReq * item.factorUnidades} u.)</small>` : '';
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>${item.nombre}</strong><br><small>Q${item.precio.toFixed(2)} c/${item.tipoEmpaque === 'Caja' ? 'caja' : 'u.'}</small></td>
+                <td><strong>${item.nombre}</strong> <span style="font-size:0.72rem; color:${esCaja ? '#0D47A1' : '#2E7D32'};">[$
+{item.presentacionVenta}]</span><br><small>Q${item.precio.toFixed(2)} c/${esCaja ? 'caja' : 'u.'}</small></td>
                 <td>
                     <button onclick="cambiarCantidadCarrito(${index}, -1)">-</button>
-                    <strong>${item.cantidadReq}${unidadTexto}</strong>
+                    <strong>${item.cantidadReq}${unidadTexto}</strong>${detalleFraccion}
                     <button onclick="cambiarCantidadCarrito(${index}, 1)">+</button>
                 </td>
                 <td>Q${subtotal.toFixed(2)}</td>
-                <td><button class="btn-danger" onclick="eliminarDelCarrito(${index})">X</button></td>
+                <td><button 
+class="btn-danger" onclick="eliminarDelCarrito(${index})">X</button></td>
             `;
             fragment.appendChild(tr);
         });
@@ -1982,7 +2553,8 @@
     }
 
     window.calcularVuelto = function() {
-        const total = calcularTotalCarritoNumerico();
+        const total = 
+calcularTotalCarritoNumerico();
         const efectivo = parseFloat(document.getElementById('montoEfectivo').value) || 0;
         const vuelto = efectivo - total;
 
@@ -1992,7 +2564,8 @@
             textoVuelto.style.color = "var(--success)";
         } else {
             textoVuelto.innerText = "Falta efectivo";
-            textoVuelto.style.color = "var(--danger)";
+            textoVuelto.style.color = 
+"var(--danger)";
         }
     }
 
@@ -2022,68 +2595,136 @@
         btnTermica.innerText = "⏳ Procesando...";
         btnCarta.innerText = "⏳ Procesando...";
 
+        const snapshotCarrito = carrito.map(item => ({ ...item }));
+        const descuentosPorProducto = new Map();
+        snapshotCarrito.forEach(item => {
+            const unidadesDescontar = item.cantidadReq * item.factorUnidades;
+            const prev = descuentosPorProducto.get(item.id) 
+|| {
+                unidades: 0,
+                stockMax: item.stockMax,
+                vendidosActuales: item.vendidosActuales
+            };
+            prev.unidades += unidadesDescontar;
+            descuentosPorProducto.set(item.id, prev);
+        });
+
+        let htmlItemsTicket = "";
+        let htmlItemsCarta = "";
+        let gananciaVentaActual = 0;
+        let productosVendidosResumen = [];
+        let itemsDetalleVenta = [];
+
+        for (const item of snapshotCarrito) {
+            const unidadesDescontadas = item.cantidadReq * item.factorUnidades;
+            const subtotalItem = item.precio * item.cantidadReq;
+            const costoTotalItem = item.costoUnitario * unidadesDescontadas;
+            const gananciaItem = subtotalItem - costoTotalItem;
+            gananciaVentaActual += gananciaItem;
+
+            const esCaja = 
+item.presentacionVenta === 'Caja';
+            const tipoTexto = esCaja ? 'caja(s)' : 'u.';
+            const extraUnidadesTexto = esCaja ? ` (${unidadesDescontadas} u.)` : '';
+
+            htmlItemsTicket += `
+                <div style="margin-bottom: 4px;">
+                    <div><strong>${item.nombre}</strong> [${item.presentacionVenta}]</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>${item.cantidadReq} ${tipoTexto}${extraUnidadesTexto} x Q$
+{item.precio.toFixed(2)}</span>
+                        <span>Q${subtotalItem.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+
+            htmlItemsCarta += `
+                <tr>
+                    <td style="padding: 6px; border: 1px solid #ddd;"><strong>${item.nombre}</strong> (${item.presentacionVenta})</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">${item.cantidadReq} ${tipoTexto}${extraUnidadesTexto}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">Q${item.precio.toFixed(2)}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">Q${subtotalItem.toFixed(2)}</td>
+                </tr>
+            `;
+
+            productosVendidosResumen.push(`${item.nombre} (${item.cantidadReq} ${tipoTexto}${extraUnidadesTexto})`);
+            
+itemsDetalleVenta.push({
+                nombre: item.nombre,
+                presentacion: item.presentacionVenta,
+                cantidad: item.cantidadReq,
+                unidades: unidadesDescontadas,
+                subtotal: subtotalItem,
+                ganancia: gananciaItem
+            });
+        }
+
+        const ahora = new Date();
+        const fechaIso = obtenerFechaLocalISO(ahora);
+        const mesIso = obtenerMesLocalISO(ahora);
+        const horaActual = ahora.toLocaleTimeString([], { 
+hour: '2-digit', minute: '2-digit' });
+
+        function prepararEImprimirComprobante() {
+            carrito = [];
+            document.getElementById('montoEfectivo').value = '';
+            renderizarCarrito();
+
+            document.getElementById('ticketSucursalNombre').innerText = sucursalActual;
+            document.getElementById('ticketFechaHora').innerText = ahora.toLocaleString();
+            
+document.getElementById('ticketContenidoItems').innerHTML = htmlItemsTicket;
+            document.getElementById('ticketTotalTexto').innerText = `TOTAL: Q${total.toFixed(2)}`;
+            document.getElementById('ticketEfectivoTexto').innerText = `Efectivo: Q${efectivo.toFixed(2)}`;
+            document.getElementById('ticketVueltoTexto').innerText = `Vuelto: Q${(efectivo - total).toFixed(2)}`;
+
+            document.getElementById('cartaSucursalNombre').innerText = `Sucursal: 
+${sucursalActual}`;
+            document.getElementById('cartaFechaHora').innerText = "Fecha: " + ahora.toLocaleString();
+            document.getElementById('cartaContenidoItems').innerHTML = htmlItemsCarta;
+            document.getElementById('cartaTotalTexto').innerText = `Q${total.toFixed(2)}`;
+            document.getElementById('cartaEfectivoTexto').innerText = `Q${efectivo.toFixed(2)}`;
+            document.getElementById('cartaVueltoTexto').innerText = 
+`Q${(efectivo - total).toFixed(2)}`;
+
+            document.body.classList.remove('modo-impresion-termica', 'modo-impresion-carta', 'modo-impresion-pdf');
+            if (tipoImpresion === 'termica') {
+                document.body.classList.add('modo-impresion-termica');
+            } else {
+                document.body.classList.add('modo-impresion-carta');
+            }
+
+            setTimeout(() => {
+                try 
+{
+                    window.print();
+                } catch (printErr) {
+                    console.warn("Error al abrir impresión:", printErr);
+                }
+            }, 100);
+        }
+
         try {
-            const snapshotCarrito = carrito.map(item => ({ ...item }));
+            if (!navigator.onLine) {
+                throw new Error("Sin conexión a Internet");
+            }
+
             const batch = writeBatch(db);
-
-            let htmlItemsTicket = "";
-            let htmlItemsCarta = "";
-            let gananciaVentaActual = 0;
-            let productosVendidosResumen = [];
-            let itemsDetalleVenta = [];
-
-            for (const item of snapshotCarrito) {
-                const nuevaCantidad = Math.max(0, item.stockMax - item.cantidadReq);
-                const nuevosVendidos = item.vendidosActuales + item.cantidadReq;
-                const prodRef = doc(db, "inventario_farmacia", item.id);
+            descuentosPorProducto.forEach((infoDesc, prodId) => {
+                const nuevaCantidad = 
+Math.max(0, infoDesc.stockMax - infoDesc.unidades);
+                const nuevosVendidos = infoDesc.vendidosActuales + infoDesc.unidades;
+                const prodRef = doc(db, "inventario_farmacia", prodId);
 
                 batch.update(prodRef, {
                     cantidad: nuevaCantidad,
                     vendidos: nuevosVendidos
                 });
-
-                const gananciaItem = (item.precio - item.costo) * item.cantidadReq;
-                gananciaVentaActual += gananciaItem;
-
-                const tipoTexto = item.tipoEmpaque === 'Caja' ? 'caja(s)' : 'u.';
-                const subtotalItem = item.precio * item.cantidadReq;
-
-                htmlItemsTicket += `
-                    <div style="margin-bottom: 4px;">
-                        <div><strong>${item.nombre}</strong></div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>${item.cantidadReq} ${tipoTexto} x Q${item.precio.toFixed(2)}</span>
-                            <span>Q${subtotalItem.toFixed(2)}</span>
-                        </div>
-                    </div>
-                `;
-
-                htmlItemsCarta += `
-                    <tr>
-                        <td style="padding: 6px; border: 1px solid #ddd;"><strong>${item.nombre}</strong></td>
-                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">${item.cantidadReq} ${tipoTexto}</td>
-                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">Q${item.precio.toFixed(2)}</td>
-                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">Q${subtotalItem.toFixed(2)}</td>
-                    </tr>
-                `;
-
-                productosVendidosResumen.push(`${item.nombre} x${item.cantidadReq}`);
-                itemsDetalleVenta.push({
-                    nombre: item.nombre,
-                    cantidad: item.cantidadReq,
-                    tipo: item.tipoEmpaque,
-                    subtotal: subtotalItem,
-                    ganancia: gananciaItem
-                });
-            }
-
-            const ahora = new Date();
-            const fechaIso = ahora.toISOString().slice(0, 10);
-            const mesIso = ahora.toISOString().slice(0, 7);
-            const horaActual = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            });
 
             const nuevaVentaRef = doc(collection(db, "ventas_farmacia"));
-            batch.set(nuevaVentaRef, {
+            batch.set(nuevaVentaRef, 
+{
                 sucursal: sucursalActual,
                 fechaHora: ahora.toISOString(),
                 fecha: fechaIso,
@@ -2095,43 +2736,70 @@
                 ganancia: gananciaVentaActual
             });
 
-            await conTimeout(batch.commit(), 12000, "Tiempo agotado al registrar la venta");
+            await conTimeout(batch.commit(), 8000, "Tiempo agotado al registrar la 
+venta");
 
-            carrito = [];
-            document.getElementById('montoEfectivo').value = '';
-            renderizarCarrito();
-
-            document.getElementById('ticketSucursalNombre').innerText = sucursalActual;
-            document.getElementById('ticketFechaHora').innerText = ahora.toLocaleString();
-            document.getElementById('ticketContenidoItems').innerHTML = htmlItemsTicket;
-            document.getElementById('ticketTotalTexto').innerText = `TOTAL: Q${total.toFixed(2)}`;
-            document.getElementById('ticketEfectivoTexto').innerText = `Efectivo: Q${efectivo.toFixed(2)}`;
-            document.getElementById('ticketVueltoTexto').innerText = `Vuelto: Q${(efectivo - total).toFixed(2)}`;
-
-            document.getElementById('cartaSucursalNombre').innerText = `Sucursal: ${sucursalActual}`;
-            document.getElementById('cartaFechaHora').innerText = "Fecha: " + ahora.toLocaleString();
-            document.getElementById('cartaContenidoItems').innerHTML = htmlItemsCarta;
-            document.getElementById('cartaTotalTexto').innerText = `Q${total.toFixed(2)}`;
-            document.getElementById('cartaEfectivoTexto').innerText = `Q${efectivo.toFixed(2)}`;
-            document.getElementById('cartaVueltoTexto').innerText = `Q${(efectivo - total).toFixed(2)}`;
-
-            document.body.classList.remove('modo-impresion-termica', 'modo-impresion-carta', 'modo-impresion-pdf');
-            if (tipoImpresion === 'termica') {
-                document.body.classList.add('modo-impresion-termica');
-            } else {
-                document.body.classList.add('modo-impresion-carta');
-            }
-
-            setTimeout(() => {
-                try {
-                    window.print();
-                } catch (printErr) {
-                    console.warn("Error al abrir impresión:", printErr);
-                }
-            }, 100);
+            prepararEImprimirComprobante();
         } catch (e) {
-            console.error("Error al procesar venta:", e);
-            alert(`No se pudo completar la venta: ${e.message || e}`);
+            const msgLower = String(e.message || "").toLowerCase();
+            const esFalloRed = !navigator.onLine ||
+                e.code === 'unavailable' ||
+                msgLower.includes("tiempo agotado") ||
+                msgLower.includes("network") ||
+                msgLower.includes("offline") ||
+                msgLower.includes("sin 
+conexión");
+
+            if (esFalloRed) {
+                const ventaPendienteObj = {
+                    idLocal: `offline_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                    sucursal: sucursalActual,
+                    fechaHora: ahora.toISOString(),
+                    fecha: fechaIso,
+                    mes: mesIso,
+                    hora: horaActual,
+                    productos: productosVendidosResumen.join(', '),
+                    detalleItems: 
+itemsDetalleVenta,
+                    total: total,
+                    ganancia: gananciaVentaActual,
+                    descuentos: Array.from(descuentosPorProducto.entries()).map(([prodId, info]) => ({
+                        prodId,
+                        unidades: info.unidades
+                    }))
+                };
+                const pendientes = leerVentasPendientes();
+                pendientes.push(ventaPendienteObj);
+                guardarVentasPendientes(
+pendientes);
+
+                descuentosPorProducto.forEach((infoDesc, prodId) => {
+                    const prodLocal = mapaInventario.get(prodId);
+                    if (prodLocal) {
+                        prodLocal.cantidad = Math.max(0, (Number(prodLocal.cantidad) || 0) - infoDesc.unidades);
+                        prodLocal.vendidos = (Number(prodLocal.vendidos) || 0) + infoDesc.unidades;
+                    }
+                });
+                guardarCacheInve
+ntarioLocal(sucursalActual, inventarioGlobal);
+
+                if (sucursalReporteFiltro === sucursalActual) {
+                    ventasHistoricasGlobal = [ventaPendienteObj, ...ventasHistoricasGlobal];
+                    sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
+                    renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+                }
+
+                renderizarVentas(inventarioGlobal);
+                renderizarInventario(inve
+ntarioGlobal);
+                actualizarResumenInventario(inventarioGlobal);
+                prepararEImprimirComprobante();
+                actualizarEstadoConexionUI();
+                alert("⚠️ Sin conexión a Internet: la venta quedó guardada en este dispositivo y se subirá automáticamente al recuperar conexión.");
+            } else {
+                console.error("Error al procesar venta:", e);
+                alert(`No se pudo completar la venta: ${e.message || e}`);
+            }
         } finally {
             procesandoVenta = false;
             btnTermica.disabled = false;
@@ -2143,7 +2811,8 @@
 
     window.generarOfertasRecuperacion = function() {
         const hoy = new Date();
-        const productosOferta = inventarioReporteFiltrado.filter(p => {
+        const productosOferta = inventarioReporteFiltrado.filter(p 
+=> {
             if (!p.vencimiento) return false;
             const venc = new Date(p.vencimiento + "T00:00:00");
             const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
@@ -2152,7 +2821,8 @@
 
         if (productosOferta.length === 0) {
             alert(`¡Excelente! No hay productos próximos a vencer (<= 60 días) en "${sucursalReporteFiltro}".`);
-            document.getElementById('resultadoOfertasContainer').style.display = 'none';
+            
+document.getElementById('resultadoOfertasContainer').style.display = 'none';
             return;
         }
 
@@ -2163,24 +2833,28 @@
             const venc = new Date(p.vencimiento + "T00:00:00");
             const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
 
-            const precioOriginal = p.precioVenta || 0;
-            const precioCosto = p.precioCosto || 0;
+            const info = obtenerPreciosYFactorProducto(p);
+            const precioOriginal = info.precioUnidad;
+            const precioCosto = info.costoUnidad;
             const precioSugeridoOferta = Math.max(precioCosto, precioOriginal * 0.70).toFixed(2);
 
-            htmlSalida += `<div style="margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">`;
-            htmlSalida += `<strong>${p.nombre}</strong> (Stock: ${p.cantidad})<br>`;
-            htmlSalida += `<small>Vence: ${p.vencimiento} (${dias} días) | Precio normal: Q${precioOriginal.toFixed(2)}</small><br>`;
-            htmlSalida += `<span style="color: var(--success); font-weight: bold;">👉 Precio de Oferta Sugerido: Q${precioSugeridoOferta}</span>`;
+            htmlSalida += `<div style="margin-bottom: 8px; border-bottom: 1px dashed #ccc; 
+padding-bottom: 5px;">`;
+            htmlSalida += `<strong>${p.nombre}</strong> (Stock: ${formatearStockDetallado(p)})<br>`;
+            htmlSalida += `<small>Vence: ${p.vencimiento} (${dias} días) | Precio normal u.: Q${precioOriginal.toFixed(2)}</small><br>`;
+            htmlSalida += `<span style="color: var(--success); font-weight: bold;">👉 Precio de Oferta Sugerido (u.): Q${precioSugeridoOferta}</span>`;
             htmlSalida += `</div>`;
 
-            textoWhatsApp += `💊 *${p.nombre}*\n• Stock disponible: ${p.cantidad}\n• Vence el: ${p.vencimiento}\n• 💥 *¡Precio de Oferta: Q${precioSugeridoOferta}!* (Antes Q${precioOriginal.toFixed(2)})\n\n`;
+            textoWhatsApp += `💊 *${p.nombre}*\n• Stock disponible: 
+${formatearStockDetallado(p)}\n• Vence el: ${p.vencimiento}\n• 💥 *¡Precio de Oferta (u.): Q${precioSugeridoOferta}!* (Antes Q${precioOriginal.toFixed(2)})\n\n`;
         });
 
         textoWhatsApp += `¡Visítanos o haz tu pedido antes de que se agoten! 🛒`;
         textoUltimasOfertasGeneradas = textoWhatsApp;
 
         document.getElementById('contenidoOfertasTexto').innerHTML = htmlSalida;
-        document.getElementById('resultadoOfertasContainer').style.display = 'block';
+        document.getElementById('resulta
+doOfertasContainer').style.display = 'block';
     }
 
     window.enviarOfertasWhatsApp = function() {
@@ -2189,7 +2863,8 @@
             return;
         }
         const urlWhatsApp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoUltimasOfertasGeneradas)}`;
-        window.open(urlWhatsApp, '_blank');
+        window.open(urlWhatsApp, 
+'_blank');
     }
 
     window.aplicarFiltroFechas = async function() {
@@ -2206,40 +2881,44 @@
             return;
         }
 
-        try {
-            const qRango = query(
-                collection(db, "ventas_farmacia"),
-                where("sucursal", "==", sucursalReporteFiltro),
-                where("fecha", ">=", fechaDesde),
-                where("fecha", "<=", fechaHasta),
-                orderBy("fecha", "desc")
-            );
-            const snap = await getDocs(qRango);
-            const ventasFiltradas = [];
-            snap.forEach(d => {
-                ventasFiltradas.push({ id: d.id, ...d.data() });
-            });
+        let baseVentas = Array.isArray(ventasHistoricasGlobal) ? ventasHistoricasGlobal : [];
 
-            let totalVentaFiltro = 0;
-            let totalGananciaFiltro = 0;
-            ventasFiltradas.forEach(v => {
-                totalVentaFiltro += Number(v.total) || 0;
-                totalGananciaFiltro += Number(v.ganancia) || 0;
-            });
-
-            document.getElementById('filtroTotalVenta').innerText = `Q${totalVentaFiltro.toFixed(2)}`;
-            document.getElementById('filtroTotalGanancia').innerText = `Q${totalGananciaFiltro.toFixed(2)}`;
-            document.getElementById('resultadoFiltroContainer').style.display = 'block';
-
-            renderizarReportesDiariosYMensuales(ventasFiltradas);
-        } catch (err) {
-            console.error("Error filtrando ventas por fecha:", err);
-            alert("No se pudo filtrar por rango de fechas. Revise la consola o cree el índice compuesto solicitado por Firestore.");
+        if (navigator.onLine) {
+            try {
+                const qSucursal = query(
+                    collection(db, "ventas_farmacia"),
+                    where("sucursal", "==", 
+sucursalReporteFiltro)
+                );
+                const snap = await getDocs(qSucursal);
+                baseVentas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (err) {
+                console.warn("Usando ventas cargadas en memoria por error de consulta/red:", err);
+            }
         }
+
+        const ventasFiltradas = baseVentas
+            .filter(v => v.fecha && v.fecha >= fechaDesde && v.fecha <= 
+fechaHasta)
+            .sort((a, b) => String(b.fechaHora || b.fecha || "").localeCompare(String(a.fechaHora || a.fecha || "")));
+
+        let totalVentaFiltro = 0;
+        let totalGananciaFiltro = 0;
+        ventasFiltradas.forEach(v => {
+            totalVentaFiltro += Number(v.total) || 0;
+            totalGananciaFiltro += Number(v.ganancia) || 0;
+        });
+
+        document.getElementById('filtroTotalVenta').innerText = `Q${totalVentaFiltro.toFixed(2)}`;
+        document.getElementById('filtroTotalGanancia').innerText = `Q${totalGananciaFiltro.toFixed(2)}`;
+        document.getElementById('resultadoFiltroContainer').style.display = 'block';
+
+        renderizarReportesDiariosYMensuales(ventasFiltradas);
     }
 
     window.limpiarFiltroFechas = function() {
-        document.getElementById('filtroFechaDesde').value = '';
+        document.getElementById('filtroFechaDesde').value = 
+'';
         document.getElementById('filtroFechaHasta').value = '';
         document.getElementById('resultadoFiltroContainer').style.display = 'none';
         renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
@@ -2247,7 +2926,8 @@
 
     window.exportarPdfDias = function() {
         if (!ventasHistoricasGlobal || ventasHistoricasGlobal.length === 0) {
-            alert(`No hay ventas registradas en "${sucursalReporteFiltro}" para generar el reporte diario.`);
+            alert(`No hay ventas registradas en 
+"${sucursalReporteFiltro}" para generar el reporte diario.`);
             return;
         }
 
@@ -2258,14 +2938,13 @@
                 agrupadoDias[dia] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
             }
             agrupadoDias[dia].totalVenta += v.total;
-            agrupadoDias[dia].totalGanancia += v.ganancia;
+            agrupadoDias[dia].totalGanancia 
++= v.ganancia;
 
             if (v.detalleItems && Array.isArray(v.detalleItems)) {
                 v.detalleItems.forEach(item => {
-                    if (!agrupadoDias[dia].productosMap[item.nombre]) {
-                        agrupadoDias[dia].productosMap[item.nombre] = 0;
-                    }
-                    agrupadoDias[dia].productosMap[item.nombre] += item.cantidad;
+                    const cantUnid = Number(item.unidades) || Number(item.cantidad) || 0;
+                    agrupadoDias[dia].productosMap[item.nombre] = (agrupadoDias[dia].productosMap[item.nombre] || 0) + cantUnid;
                 });
             }
         });
@@ -2277,7 +2956,8 @@
                         <th style="padding: 6px; border: 1px solid #ddd;">Fecha</th>
                         <th style="padding: 6px; border: 1px solid #ddd;">Productos Vendidos</th>
                         <th style="padding: 6px; border: 1px solid #ddd;">Venta Total</th>
-                        <th style="padding: 6px; border: 1px solid #ddd;">Ganancia Neta</th>
+                        <th style="padding: 6px; border: 1px solid 
+#ddd;">Ganancia Neta</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2288,7 +2968,7 @@
             const data = agrupadoDias[dia];
             let listaProdTexto = [];
             for (let prod in data.productosMap) {
-                listaProdTexto.push(`${prod} (x${data.productosMap[prod]})`);
+                listaProdTexto.push(`${prod} (${data.productosMap[prod]} u.)`);
             }
 
             htmlTabla += `
@@ -2326,14 +3006,13 @@
                 agrupadoMeses[mes] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
             }
             agrupadoMeses[mes].totalVenta += v.total;
-            agrupadoMeses[mes].totalGanancia += v.ganancia;
+            
+agrupadoMeses[mes].totalGanancia += v.ganancia;
 
             if (v.detalleItems && Array.isArray(v.detalleItems)) {
                 v.detalleItems.forEach(item => {
-                    if (!agrupadoMeses[mes].productosMap[item.nombre]) {
-                        agrupadoMeses[mes].productosMap[item.nombre] = 0;
-                    }
-                    agrupadoMeses[mes].productosMap[item.nombre] += item.cantidad;
+                    const cantUnid = Number(item.unidades) || Number(item.cantidad) || 0;
+                    agrupadoMeses[mes].productosMap[item.nombre] = (agrupadoMeses[mes].productosMap[item.nombre] || 0) + cantUnid;
                 });
             }
         });
@@ -2356,7 +3035,8 @@
             const data = agrupadoMeses[mes];
             let listaProdTexto = [];
             for (let prod in data.productosMap) {
-                listaProdTexto.push(`${prod} (x${data.productosMap[prod]})`);
+                listaProdTexto.push(`${prod} ($
+{data.productosMap[prod]} u.)`);
             }
 
             htmlTabla += `
@@ -2364,7 +3044,8 @@
                     <td style="padding: 6px; border: 1px solid #ddd; font-weight: bold;">${mes}</td>
                     <td style="padding: 6px; border: 1px solid #ddd;">${listaProdTexto.join('<br>')}</td>
                     <td style="padding: 6px; border: 1px solid #ddd;">Q${data.totalVenta.toFixed(2)}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; color: #2E7D32; font-weight: bold;">Q${data.totalGanancia.toFixed(2)}</td>
+                    <td style="padding: 6px; border: 1px solid #ddd; color: #2E7D32; font-weight: 
+bold;">Q${data.totalGanancia.toFixed(2)}</td>
                 </tr>
             `;
         });
@@ -2373,7 +3054,8 @@
 
         document.getElementById('pdfTituloReporte').innerText = `REPORTE DE VENTAS POR MES - ${sucursalReporteFiltro}`;
         document.getElementById('pdfSubtituloFecha').innerText = "Generado el: " + new Date().toLocaleString();
-        document.getElementById('pdfContenidoCuerpo').innerHTML = htmlTabla;
+        
+document.getElementById('pdfContenidoCuerpo').innerHTML = htmlTabla;
 
         document.body.classList.remove('modo-impresion-termica', 'modo-impresion-carta');
         document.body.classList.add('modo-impresion-pdf');
@@ -2381,20 +3063,23 @@
         window.print();
     }
 
-    window.cargarParaEditar = function(id, codigo, nombre, lote, estante, proveedor, tipoEmpaque, unidadesPorCaja, cantidad, precioCosto, precioVenta, vencimiento) {
+    window.cargarParaEditar = function(id, codigo, nombre, lote, estante, proveedor, tipoEmpaque, unidadesPorCaja, cantidad, precioCosto, precioVenta, 
+vencimiento) {
         document.getElementById('editandoId').value = id;
         document.getElementById('codigoBarras').value = codigo;
         document.getElementById('nombreProducto').value = nombre;
         document.getElementById('loteProducto').value = lote;
         document.getElementById('estanteProducto').value = estante;
-        document.getElementById('proveedorProducto').value = proveedor || '';
+        document.getElementById('proveedorProducto').value = proveedor || 
+'';
         document.getElementById('tipoEmpaque').value = tipoEmpaque;
-        toggleUnidadesPorCaja();
         document.getElementById('unidadesPorCaja').value = unidadesPorCaja > 1 ? unidadesPorCaja : '';
+        toggleUnidadesPorCaja();
         document.getElementById('costoProducto').value = precioCosto;
         document.getElementById('ventaProducto').value = precioVenta;
         document.getElementById('cantidadProducto').value = cantidad;
-        document.getElementById('vencimientoProducto').value = vencimiento;
+        
+document.getElementById('vencimientoProducto').value = vencimiento;
 
         document.getElementById('tituloFormulario').innerText = "✏️ Modificar Producto";
         document.getElementById('btnGuardar').innerText = "Actualizar en la Nube";
@@ -2402,15 +3087,18 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    window.cancelarEdicion = function() {
+    window.cancelarEdicion = 
+function() {
         limpiarFormulario();
         document.getElementById('editandoId').value = '';
         document.getElementById('tituloFormulario').innerText = "Registrar / Escanear Producto";
         document.getElementById('btnGuardar').innerText = "Guardar en la Nube";
         document.getElementById('btnCancelarEdicion').style.display = 'none';
+        toggleUnidadesPorCaja();
     }
 
-    window.eliminarProductoNube = async function(id) {
+    window.eliminarProductoNube 
+= async function(id) {
         if (confirm("¿Estás seguro de eliminar este producto?")) {
             await deleteDoc(doc(db, "inventario_farmacia", id));
         }
@@ -2420,13 +3108,15 @@
         document.getElementById('codigoBarras').value = '';
         document.getElementById('nombreProducto').value = '';
         document.getElementById('loteProducto').value = '';
-        document.getElementById('estanteProducto').value = '';
+        
+document.getElementById('estanteProducto').value = '';
         document.getElementById('proveedorProducto').value = '';
         document.getElementById('tipoEmpaque').value = 'Unidad';
         document.getElementById('unidadesPorCaja').value = '';
         document.getElementById('costoProducto').value = '';
         document.getElementById('ventaProducto').value = '';
-        document.getElementById('cantidadProducto').value = '';
+        document.getElementById('cantidadProducto').value = 
+'';
         document.getElementById('vencimientoProducto').value = '';
         toggleUnidadesPorCaja();
     }
@@ -2443,7 +3133,8 @@
         return { texto: "OK", clase: "badge-ok" };
     }
 
-    function actualizarReportesInventario(lista) {
+    function 
+actualizarReportesInventario(lista) {
         renderizarAgotados(lista);
         renderizarMasVendidos(lista);
         filtrarGananciaPorProducto(lista);
@@ -2455,15 +3146,15 @@
         let costoTotalInversion = 0;
         let valorTotalVenta = 0;
 
-        for (let i = 0; i < lista.length; i++) {
+        for (let i = 0; i < lista.length; i++) 
+{
             const p = lista[i];
-            const stock = p.cantidad || 0;
-            const costo = p.precioCosto || 0;
-            const venta = p.precioVenta || 0;
+            const stock = Number(p.cantidad) || 0;
+            const info = obtenerPreciosYFactorProducto(p);
 
             cantidadTotalProductos += stock;
-            costoTotalInversion += (costo * stock);
-            valorTotalVenta += (venta * stock);
+            costoTotalInversion += (info.costoUnidad * stock);
+            valorTotalVenta += (info.precioUnidad * stock);
         }
 
         document.getElementById('resumenCantTotal').innerText = cantidadTotalProductos.toLocaleString();
@@ -2474,7 +3165,8 @@
     function renderizarInventario(lista) {
         const tbody = document.getElementById('listaInventario');
         if (lista.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">No hay productos registrados en ${sucursalActual}.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">No hay 
+productos registrados en ${sucursalActual}.</td></tr>`;
             return;
         }
 
@@ -2483,21 +3175,32 @@
 
         visible.forEach((p) => {
             const estado = calcularEstado(p.vencimiento, p.cantidad);
-            const infoEmpaque = p.tipoEmpaque === 'Caja' ? `📦 ${p.cantidad} Caja(s) (c/u ${p.unidadesPorCaja} u.)` : `Unid: ${p.cantidad}`;
+            const info = obtenerPreciosYFactorProducto(p);
+            const infoEmpaque = info.tieneVentaPorCaja
+                ? 
+`${formatearStockDetallado(p)} <br><small style="color:#555;">Caja de ${info.unidPorCaja} u.</small>`
+                : `Unid: ${p.cantidad}`;
             const provTexto = p.proveedor ? ` | 🏢 ${p.proveedor}` : '';
-            const unidCaja = p.unidadesPorCaja !== undefined ? p.unidadesPorCaja : 1;
+            const unidCaja = info.unidPorCaja;
             const provSeguro = p.proveedor ? p.proveedor.replace(/'/g, "\\'") : '';
             const nombreSeguro = (p.nombre || "").replace(/'/g, "\\'");
+
+            const preciosHtml = info.tieneVentaPorCaja
+                ? `Caja: <strong>Q${info.precioCaja.toFixed(2)}
+</strong><br><small style="color:#0D47A1;">Unid: Q${info.precioUnidad.toFixed(2)}</small>`
+                : `V: <strong>Q${info.precioUnidad.toFixed(2)}</strong> <small>(u.)</small>`;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
-                <td>${infoEmpaque}<br><small style="color:#0D47A1; font-weight:bold;">📍 ${p.estante}${provTexto}</small></td>
-                <td>V: <strong>Q${Number(p.precioVenta || 0).toFixed(2)}</strong> <small>(${p.tipoEmpaque === 'Caja' ? 'caja' : 'u.'})</small></td>
+                <td>${infoEmpaque}<br><small style="color:#0D47A1; font-weight:bold;">📍 ${p.estante}$
+{provTexto}</small></td>
+                <td>${preciosHtml}</td>
                 <td><span class="${estado.clase}">${estado.texto}</span></td>
                 <td>
-                    <button class="btn-edit" onclick="cargarParaEditar('${p.id}', '${p.codigo}', '${nombreSeguro}', '${p.lote}', '${p.estante}', '${provSeguro}', '${p.tipoEmpaque || 'Unidad'}', ${unidCaja}, ${p.cantidad}, ${p.precioCosto}, ${p.precioVenta}, '${p.vencimiento}')">Editar</button>
-                    <button class="btn-danger" onclick="eliminarProductoNube('${p.id}')">Eliminar</button>
+                    <button class="btn-edit" onclick="cargarParaEditar('${p.id}', '${p.codigo}', '${nombreSeguro}', '${p.lote}', '${p.estante}', '${provSeguro}', '${info.tipoEmpaque}', ${unidCaja}, ${p.cantidad}, ${p.precioCosto}, ${p.precioVenta}, '${p.vencimiento}')">Editar</button>
+                    <button class="btn-danger" onclick="eliminarProductoNube('$
+{p.id}')">Eliminar</button>
                 </td>
             `;
             fragment.appendChild(tr);
@@ -2524,14 +3227,24 @@
         const fragment = document.createDocumentFragment();
 
         visible.forEach((p) => {
-            const stockTexto = p.tipoEmpaque === 'Caja' ? `${p.cantidad} cajas` : `${p.cantidad} u.`;
+            const info = obtenerPreciosYFactorProducto(p);
+            const stockTexto = formatearStockDetallado(p);
+
+            const precioTexto = info.tieneVentaPorCaja
+                ? `<strong style="color:var(--success);">Q${info.precioUnidad.toFixed(2)} 
+<small>(u.)</small></strong><br><strong style="color:var(--primary);">Q${info.precioCaja.toFixed(2)} <small>(caja x${info.unidPorCaja})</small></strong>`
+                : `<strong style="color:var(--success);">Q${info.precioUnidad.toFixed(2)} <small>(u.)</small></strong>`;
+
+            const accionesHtml = info.tieneVentaPorCaja
+                ? `<button class="btn-sell" onclick="agregarAlCarrito('${p.id}', 'Unidad')">+ 1 Unid.</button><button class="btn-sell-box" 
+onclick="agregarAlCarrito('${p.id}', 'Caja')">+ 1 Caja</button>`
+                : `<button class="btn-sell" onclick="agregarAlCarrito('${p.id}', 'Unidad')">Agregar</button>`;
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo} | 📍 ${p.estante}</small></td>
-                <td>Stock: <strong>${stockTexto}</strong><br><strong style="color:var(--success);">Q${Number(p.precioVenta || 0).toFixed(2)} <small>(${p.tipoEmpaque === 'Caja' ? 'caja' : 'u.'})</small></strong></td>
-                <td>
-                    <button class="btn-sell" onclick="agregarAlCarrito('${p.id}')">Agregar</button>
-                </td>
+                <td>Stock: <strong>${stockTexto}</strong><br>${precioTexto}</td>
+                <td>${accionesHtml}</td>
             `;
             fragment.appendChild(tr);
         });
@@ -2572,17 +3285,22 @@
         }
         const fragment = document.createDocumentFragment();
         lista.slice(0, 200).forEach((p) => {
-            const costo = p.precioCosto || 0;
-            const venta = p.precioVenta || 0;
+            const info = obtenerPreciosYFactorProducto(p);
+            const costo = info.costoUnidad;
+            const venta = info.precioUnidad;
             const ganancia = venta - costo;
             const margen = costo > 0 ? ((ganancia / costo) * 100).toFixed(0) : 0;
-            const tipoTexto = p.tipoEmpaque === 'Caja' ? 'caja' : 'u.';
+
+            const extraCaja = info.tieneVentaPorCaja
+                ? `<br><small style="color:#0D47A1;">Caja: Q${(info.precioCaja - info.costoCaja).toFixed(2)}</small>`
+                : '';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
-                <td>C: Q${costo.toFixed(2)} | V: Q${venta.toFixed(2)}</td>
-                <td><strong style="color:var(--success);">Q${ganancia.toFixed(2)}</strong> <small>(${margen}%)</small><br><small style="color:#666;">por ${tipoTexto}</small></td>
+                <td>C/u: Q${costo.toFixed(2)} | V/u: Q${venta.toFixed(2)}</td>
+                <td><strong style="color:var(--success);">Q$
+{ganancia.toFixed(2)}</strong> <small>(${margen}%)</small><br><small style="color:#666;">por u.</small>${extraCaja}</td>
             `;
             fragment.appendChild(tr);
         });
@@ -2624,7 +3342,8 @@
 
     function renderizarResumenVentasHoy() {
         const tbody = document.getElementById('listaResumenVentas');
-        if (historialVentasDia.length === 0) {
+        if (historialVentasDia.length 
+=== 0) {
             tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy en ${sucursalReporteFiltro}.</td></tr>`;
             return;
         }
@@ -2632,7 +3351,8 @@
         historialVentasDia.forEach((v) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>#${v.numero}</strong><br><small style="color:#666;">🕒 ${v.hora}</small></td>
+                <td><strong>#${v.numero}</strong><br><small style="color:#666;">🕒 ${v.hora}</
+small></td>
                 <td><small>${v.productos}</small></td>
                 <td>Total: <strong>Q${v.total.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${v.ganancia.toFixed(2)}</strong></td>
             `;
@@ -2642,13 +3362,15 @@
         tbody.appendChild(fragment);
     }
 
-    function renderizarReportesDiariosYMensuales(ventas) {
+    function renderizarReportesDiariosYMensuales(ventas) 
+{
         const tbodyDia = document.getElementById('listaVentasPorDia');
         const tbodyMes = document.getElementById('listaVentasPorMes');
 
         if (!ventas || ventas.length === 0) {
             tbodyDia.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en ${sucursalReporteFiltro} para este período.</td></tr>`;
-            tbodyMes.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en ${sucursalReporteFiltro} para este período.</td></tr>`;
+            tbodyMes.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en $
+{sucursalReporteFiltro} para este período.</td></tr>`;
             return;
         }
 
@@ -2672,8 +3394,9 @@
 
             if (v.detalleItems && Array.isArray(v.detalleItems)) {
                 v.detalleItems.forEach(item => {
-                    agrupadoDias[dia].productosMap[item.nombre] = (agrupadoDias[dia].productosMap[item.nombre] || 0) + item.cantidad;
-                    agrupadoMeses[mes].productosMap[item.nombre] = (agrupadoMeses[mes].productosMap[item.nombre] || 0) + item.cantidad;
+                    const cantUnid = Number(item.unidades) || Number(item.cantidad) || 0;
+                    agrupadoDias[dia].productosMap[item.nombre] = (agrupadoDias[dia].productosMap[item.nombre] || 0) + cantUnid;
+                    agrupadoMeses[mes].productosMap[item.nombre] = (agrupadoMeses[mes].productosMap[item.nombre] || 0) + cantUnid;
                 });
             }
         });
@@ -2681,10 +3404,11 @@
         const fragDia = document.createDocumentFragment();
         Object.keys(agrupadoDias).sort().reverse().forEach(dia => {
             const data = agrupadoDias[dia];
-            const listaProdTexto = Object.keys(data.productosMap).map(prod => `• ${prod} (x${data.productosMap[prod]})`);
+            const listaProdTexto = Object.keys(data.productosMap).map(prod => `• ${prod} (${data.productosMap[prod]} u.)`);
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><strong>📅 ${dia}</strong></td>
+                <td><strong>📅 ${dia}</
+strong></td>
                 <td><small>${listaProdTexto.join('<br>')}</small></td>
                 <td>Venta: <strong>Q${data.totalVenta.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${data.totalGanancia.toFixed(2)}</strong></td>
             `;
@@ -2693,10 +3417,11 @@
         tbodyDia.innerHTML = '';
         tbodyDia.appendChild(fragDia);
 
-        const fragMes = document.createDocumentFragment();
+        const fragMes = document.crea
+teDocumentFragment();
         Object.keys(agrupadoMeses).sort().reverse().forEach(mes => {
             const data = agrupadoMeses[mes];
-            const listaProdTexto = Object.keys(data.productosMap).map(prod => `• ${prod} (x${data.productosMap[prod]})`);
+            const listaProdTexto = Object.keys(data.productosMap).map(prod => `• ${prod} (${data.productosMap[prod]} u.)`);
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>📆 ${mes}</strong></td>
@@ -2722,12 +3447,13 @@
         agotadosBS.slice(0, 200).forEach((p) => {
             const esAgotado = p.cantidad <= 0;
             const estiloStock = esAgotado ? 'color: var(--danger); font-weight: bold;' : 'color: var(--warning-text); font-weight: bold;';
-            const textoEstado = esAgotado ? '🔴 AGOTADO (0)' : `⚠️ Stock bajo: ${p.cantidad}`;
+            const textoEstado = esAgotado ? '🔴 AGOTADO (0)' : `⚠️ Stock bajo: ${formatearStockDetallado(p)}`;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${p.nombre}</strong><br><small style="${estiloStock}">${textoEstado}</small></td>
-                <td>Cód: ${p.codigo}<br>📍 ${p.estante} ${p.proveedor ? ' | 🏢 ' + p.proveedor : ''}</td>
+                <td>Cód: ${p.codigo}<br>
+📍 ${p.estante} ${p.proveedor ? ' | 🏢 ' + p.proveedor : ''}</td>
                 <td><button class="btn-danger" onclick="eliminarProductoNube('${p.id}')">Eliminar</button></td>
             `;
             fragment.appendChild(tr);
@@ -2737,7 +3463,8 @@
     }
 
     window.enviarAgotadosWhatsApp = function() {
-        const agotadosReales = inventarioReporteFiltrado.filter(p => p.cantidad <= 0);
+        const agotadosReales = inventarioReporteFiltrado.filter(p 
+=> p.cantidad <= 0);
         if (agotadosReales.length === 0) {
             alert(`No hay productos agotados en "${sucursalReporteFiltro}" para reportar.`);
             return;
@@ -2745,7 +3472,8 @@
 
         let textoReporte = `🚨 *REPORTE DE AGOTADOS - ${sucursalReporteFiltro}* 🚨\n\n`;
         agotadosReales.forEach(p => {
-            textoReporte += `- *${p.nombre}* (Cód: ${p.codigo}) -> *AGOTADO (0)* | Estante: ${p.estante} | Prov: ${p.proveedor || 'N/D'}\n`;
+            textoReporte += `- *${p.nombre}* (Cód: ${p.codigo}) -> *AGOTADO (0)* | Estante: ${p.estante} | Prov: ${p.proveedor 
+|| 'N/D'}\n`;
         });
         textoReporte += `\nFavor verificar disponibilidad para pedido de reposición. 📦`;
 
@@ -2764,11 +3492,11 @@
 
         const fragment = document.createDocumentFragment();
         ordenados.forEach((p) => {
-            const unidadTexto = p.tipoEmpaque === 'Caja' ? ' cajas' : ' unidades';
-            const tr = document.createElement('tr');
+            const tr = 
+document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${p.nombre}</strong><br><small style="color:#666;">Cód: ${p.codigo}</small></td>
-                <td><strong style="color:var(--success); font-size: 1rem;">${p.vendidos}${unidadTexto}</strong></td>
+                <td><strong style="color:var(--success); font-size: 1rem;">${p.vendidos} u.</strong></td>
                 <td>📍 ${p.estante}</td>
             `;
             fragment.appendChild(tr);
@@ -2785,7 +3513,8 @@
                 renderizarInventario(inventarioGlobal);
                 return;
             }
-            const filtrados = inventarioGlobal.filter(p => (p._busqueda || "").includes(texto));
+            const filtrados = inventarioGlobal.filter(p => (p._busqueda || 
+"").includes(texto));
             renderizarInventario(filtrados);
         }, 140);
     }
@@ -2795,7 +3524,8 @@
         timeoutBusquedaVentas = setTimeout(() => {
             const texto = document.getElementById('buscadorVentas').value.trim().toLowerCase();
             if (!texto) {
-                renderizarVentas(inventarioGlobal);
+                renderizarVentas(inventar
+ioGlobal);
                 return;
             }
             const porCodigoExacto = mapaPorCodigo.get(texto);
@@ -2824,13 +3554,14 @@
             if (valor) {
                 const exacto = mapaPorCodigo.get(valor);
                 if (exacto) {
-                    agregarAlCarrito(exacto.id);
+                    agregarAlCarrito(exacto.id, 'Unidad');
                     reproducirBeepCaja();
                 }
             }
             input.value = '';
             limiteActualVentas = LIMITE_FILAS_TABLA;
-            renderizarVentas(inventarioGlobal);
+            renderizarVentas(inventario
+Global);
         }
     }
 
@@ -2864,7 +3595,8 @@
             osc.start(ahora);
             osc.stop(ahora + 0.15);
         } catch (e) {
-            console.warn("No se pudo reproducir el beep:", e);
+            console.warn("No se pudo 
+reproducir el beep:", e);
         }
     }
 
@@ -2920,7 +3652,7 @@
                 p => String(p.codigo || "").trim() === codigoLeido
             );
             if (encontrado) {
-                agregarAlCarrito(encontrado.id);
+                agregarAlCarrito(encontrado.id, 'Unidad');
                 mostrarAvisoEscaner(`✅ Agregado: ${encontrado.nombre}`);
             } else {
                 mostrarAvisoEscaner(`⚠️ Código (${codigoLeido}) no encontrado`, true);
@@ -2947,7 +3679,8 @@
         if ('BarcodeDetector' in window) {
             try {
                 const detector = new window.BarcodeDetector({
-                    formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code']
+                    formats: ['ean_13', 
+'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code']
                 });
 
                 streamEscanerActivo = await navigator.mediaDevices.getUserMedia({
@@ -2970,7 +3703,8 @@
                 video.style.objectFit = 'cover';
                 contenedor.appendChild(video);
                 await video.play();
-                mostrarAvisoEscaner("📷 Cámara lista: pase los productos uno tras otro");
+                mostrarAvisoEscaner("📷 
+Cámara lista: pase los productos uno tras otro");
 
                 intervaloDetectorNativo = setInterval(async () => {
                     if (enfriamientoEscaneo || video.readyState < 2) return;
@@ -3036,7 +3770,8 @@
         });
     }
 
-    window.detenerEscaneo = function() {
+    window.detenerEscaneo = 
+function() {
         enfriamientoEscaneo = false;
         if (timeoutEnfriamiento) {
             clearTimeout(timeoutEnfriamiento);
@@ -3060,7 +3795,8 @@
 
         document.getElementById('interactive').style.display = 'none';
         document.getElementById('btnDetener').style.display = 'none';
-        document.getElementById('interactiveVentas').style.display = 'none';
+        document.getElementById('interactiveVentas').style.display = 
+'none';
         document.getElementById('btnDetenerVentas').style.display = 'none';
     }
 
