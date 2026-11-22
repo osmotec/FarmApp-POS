@@ -631,6 +631,25 @@
                 <span style="font-size: 0.75rem; font-weight: normal; color: #2E7D32;">Stock y ticket de esta sucursal</span>
             </div>
 
+            <div class="form-section" style="border-left: 4px solid var(--primary); background: #F8FBFF; margin-bottom: 12px;">
+                <h3 style="color: var(--primary); margin-top: 0;">🩺 Asistente de Síntomas (Prioridad por Vencimiento)</h3>
+                <p style="font-size: 0.78rem; color: #555; margin: 0 0 8px 0;">
+                    Sugiere productos con stock disponible en <strong id="etiquetaSucursalAsistente">esta sucursal</strong>, ordenados del lote más próximo a vencer al más lejano. Apoyo de mostrador; no sustituye criterio farmacéutico o médico.
+                </p>
+                <div class="row" style="gap: 8px; align-items: center;">
+                    <div class="col">
+                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. dolor de cabeza y fiebre, tos, acidez, alergia..." onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
+                    </div>
+                    <div style="flex: 0 0 auto;">
+                        <button type="button" class="btn" id="btnBuscarSintomas" style="margin-top: 0; width: auto; padding: 10px 14px;" onclick="buscarSugerenciasSintomas()">
+                            🔍 Sugerir
+                        </button>
+                    </div>
+                </div>
+                <div id="estadoAsistenteSintomas" style="font-size: 0.78rem; color: #555; margin-top: 6px;"></div>
+                <div id="resultadosAsistenteSintomas" style="margin-top: 8px;"></div>
+            </div>
+
             <button class="btn btn-camera" onclick="iniciarEscanerCamera('ventas')">📷 Escanear con Cámara para Vender</button>
             <div id="interactiveVentas" class="viewport"></div>
             <button id="btnDetenerVentas" class="btn btn-danger" style="display:none; margin-bottom:10px;" onclick="detenerEscaneo()">Cerrar Cámara</button>
@@ -1047,6 +1066,7 @@
     let reportesDesactualizados = true;
     let procesandoVenta = false;
     let sincronizandoColaOffline = false;
+    let apiKeyGeminiCache = null;
 
     let streamEscanerActivo = null;
     let intervaloDetectorNativo = null;
@@ -1359,11 +1379,13 @@
         const badgeVen = document.getElementById('badgeSucursalVentas');
         const ticketLbl = document.getElementById('etiquetaSucursalTicket');
         const corLbl = document.getElementById('etiquetaSucursalCorte');
+        const asisLbl = document.getElementById('etiquetaSucursalAsistente');
         if (invLbl) invLbl.innerText = sucursalActual;
         if (venLbl) venLbl.innerText = sucursalActual;
         if (badgeVen) badgeVen.innerText = sucursalActual;
         if (ticketLbl) ticketLbl.innerText = sucursalActual;
         if (corLbl) corLbl.innerText = sucursalReporteFiltro;
+        if (asisLbl) asisLbl.innerText = sucursalActual;
     }
 
     function renderizarSelectoresSucursales(filtroTexto = "") {
@@ -1539,6 +1561,11 @@
         renderizarCarrito();
         limiteActualInventario = LIMITE_FILAS_TABLA;
         limiteActualVentas = LIMITE_FILAS_TABLA;
+
+        const contSintomas = document.getElementById("resultadosAsistenteSintomas");
+        const estadoSintomas = document.getElementById("estadoAsistenteSintomas");
+        if (contSintomas) contSintomas.innerHTML = "";
+        if (estadoSintomas) estadoSintomas.innerHTML = "";
 
         if (!sucursalesDisponibles.includes(sucursalReporteFiltro)) {
             sucursalReporteFiltro = sucursalActual;
@@ -1956,6 +1983,279 @@
         } catch (err) {
             console.error("Error al anular venta:", err);
             alert(`No se pudo anular la venta: ${err.message || err}`);
+        }
+    }
+
+    /* --- ASISTENTE DE SÍNTOMAS (ORDEN POR VENCIMIENTO + GEMINI 2.5 FLASH + RESPALDO LOCAL) --- */
+    function obtenerProductosVigentesOrdenadosPorVencimiento() {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        return (inventarioGlobal || [])
+            .map((p) => {
+                const stock = Number(p.cantidad) || 0;
+                if (stock <= 0 || !p.vencimiento) return null;
+
+                const venc = new Date(p.vencimiento + "T00:00:00");
+                if (isNaN(venc.getTime())) return null;
+
+                const diasRestantes = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
+                if (diasRestantes < 0) return null;
+
+                const info = obtenerPreciosYFactorProducto(p);
+                return {
+                    prod: p,
+                    diasRestantes,
+                    timestampVenc: venc.getTime(),
+                    precioUnidad: info.precioUnidad,
+                    stockTexto: formatearStockDetallado(p)
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.timestampVenc - b.timestampVenc);
+    }
+
+    async function obtenerApiKeyGemini() {
+        if (apiKeyGeminiCache) return apiKeyGeminiCache;
+        if (!navigator.onLine || !db) return null;
+
+        try {
+            const snap = await conTimeout(
+                getDoc(doc(db, "configuracion", "ia")),
+                5000,
+                "Tiempo agotado al leer configuración de IA"
+            );
+            if (snap.exists()) {
+                const data = snap.data() || {};
+                const key = String(data.geminiApiKey || data.apiKey || "").trim();
+                if (key) {
+                    apiKeyGeminiCache = key;
+                    return key;
+                }
+            }
+        } catch (err) {
+            console.warn("No se pudo obtener la API key desde configuracion/ia:", err);
+        }
+        return null;
+    }
+
+    function filtrarLocalPorSintoma(consulta, candidatosOrdenados) {
+        const q = consulta.toLowerCase().trim();
+        const diccionarioSintomas = {
+            fiebre: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "antipiretico", "dolor"],
+            dolor: ["ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "diclofenaco", "ketorolaco", "analgesico"],
+            cabeza: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "migraña", "migrana"],
+            garganta: ["ambroxol", "loratadina", "cetirizina", "ibuprofeno", "ibuprofena", "pastilla", "jarabe"],
+            tos: ["ambroxol", "bromhexina", "dextrometorfano", "jarabe", "bronco"],
+            gripe: ["loratadina", "cetirizina", "paracetamol", "acetaminofen", "descongestionante", "antigripal"],
+            resfriado: ["loratadina", "cetirizina", "paracetamol", "acetaminofen", "descongestionante"],
+            alergia: ["loratadina", "cetirizina", "clorfeniramina", "fexofenadina", "antialergico"],
+            estomago: ["omeprazol", "esomeprazol", "antiacido", "bismuto", "hioscina", "simeticona", "gastritis"],
+            acidez: ["omeprazol", "esomeprazol", "antiacido", "ranitidina", "famotidina"],
+            gastritis: ["omeprazol", "esomeprazol", "antiacido", "sucralfato"],
+            colico: ["hioscina", "butilhioscina", "ibuprofeno", "ibuprofena"],
+            diarrea: ["loperamida", "bismuto", "suero", "electrolitos", "rehidratacion"],
+            vomito: ["dimenhydrinato", "dimenidrinato", "metoclopramida", "suero"]
+        };
+
+        const palabras = q.split(/\s+/).filter(Boolean);
+        const terminosExpandidos = new Set(palabras);
+
+        palabras.forEach((pal) => {
+            Object.keys(diccionarioSintomas).forEach((clave) => {
+                if (pal.includes(clave) || clave.includes(pal)) {
+                    terminosExpandidos.add(clave);
+                    diccionarioSintomas[clave].forEach((syn) => terminosExpandidos.add(syn.trim()));
+                }
+            });
+        });
+
+        const coincidencias = candidatosOrdenados.filter(({ prod }) => {
+            const textoProd = `${prod.nombre || ""} ${prod.proveedor || ""}`.toLowerCase();
+            return Array.from(terminosExpandidos).some((termino) => termino.length >= 3 && textoProd.includes(termino));
+        });
+
+        return coincidencias.length > 0 ? coincidencias : candidatosOrdenados.slice(0, 6);
+    }
+
+    async function consultarGeminiSintomas(sintoma, candidatosOrdenados, apiKey) {
+        const catalogoReducido = candidatosOrdenados.slice(0, 60).map(({ prod, diasRestantes, precioUnidad }) => ({
+            id: prod.id,
+            nombre: prod.nombre,
+            presentacion: prod.tipoEmpaque || "Unidad",
+            stock: Number(prod.cantidad) || 0,
+            vencimiento: prod.vencimiento,
+            diasRestantes,
+            precioUnidad: Number(precioUnidad.toFixed(2))
+        }));
+
+        const prompt = [
+            `Síntoma o consulta en mostrador de farmacia: "${sintoma}".`,
+            `A continuación tienes productos vigentes (no vencidos) y con stock > 0, ya ordenados del más próximo a vencer al más lejano:`,
+            JSON.stringify(catalogoReducido),
+            `Selecciona hasta 8 productos del catálogo que mejor correspondan al síntoma.`,
+            `Mantén el orden de menor diasRestantes (más próximo a vencer) primero.`
+        ].join("\n");
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const resp = await conTimeout(
+            fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                sugerencias: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            id: { type: "STRING" },
+                                            motivoBreve: { type: "STRING" }
+                                        },
+                                        required: ["id", "motivoBreve"]
+                                    }
+                                }
+                            },
+                            required: ["sugerencias"]
+                        }
+                    }
+                })
+            }),
+            10000,
+            "Tiempo agotado al consultar Gemini"
+        );
+
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}`);
+        }
+
+        const data = await resp.json();
+        const textoJson = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!textoJson) {
+            throw new Error("Respuesta vacía de Gemini");
+        }
+
+        const parsed = JSON.parse(textoJson);
+        const listaSug = Array.isArray(parsed.sugerencias) ? parsed.sugerencias : [];
+        const motivosPorId = new Map(listaSug.map((s) => [String(s.id), String(s.motivoBreve || "")]));
+
+        const seleccionados = candidatosOrdenados
+            .filter((item) => motivosPorId.has(String(item.prod.id)))
+            .map((item) => ({
+                ...item,
+                motivoBreve: motivosPorId.get(String(item.prod.id))
+            }));
+
+        return seleccionados.sort((a, b) => a.timestampVenc - b.timestampVenc);
+    }
+
+    function renderizarResultadosAsistente(items, origenTexto) {
+        const cont = document.getElementById("resultadosAsistenteSintomas");
+        const estado = document.getElementById("estadoAsistenteSintomas");
+        if (!cont || !estado) return;
+
+        estado.innerHTML = origenTexto;
+
+        if (!items || items.length === 0) {
+            cont.innerHTML = `<div style="font-size:0.82rem; color:#777; padding:6px;">No se encontraron productos vigentes con stock para ese síntoma en ${sucursalActual}.</div>`;
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        items.slice(0, 8).forEach(({ prod, diasRestantes, precioUnidad, stockTexto, motivoBreve }) => {
+            const card = document.createElement("div");
+            card.style.cssText = "display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:8px 10px; margin-bottom:6px;";
+
+            const badgeDias = diasRestantes <= 90
+                ? `<span class="badge-warning">Vence en ${diasRestantes}d (${prod.vencimiento})</span>`
+                : `<span class="badge-ok">Vence ${prod.vencimiento} (${diasRestantes}d)</span>`;
+
+            const motivoHtml = motivoBreve
+                ? `<div style="font-size:0.76rem; color:#444; margin-top:2px;">💡 ${motivoBreve}</div>`
+                : "";
+
+            card.innerHTML = `
+                <div style="flex:1; min-width:0;">
+                    <div><strong>${prod.nombre}</strong> — <strong style="color:var(--success);">Q${precioUnidad.toFixed(2)}</strong></div>
+                    <div style="font-size:0.76rem; color:#555; margin-top:2px;">
+                        Stock: <strong>${stockTexto}</strong> | 📍 ${prod.estante || "General"} ${badgeDias}
+                    </div>
+                    ${motivoHtml}
+                </div>
+                <div style="flex:0 0 auto;">
+                    <button type="button" class="btn-sell" style="padding:7px 10px; width:auto;" onclick="agregarAlCarrito('${prod.id}', 'Unidad')">+ Agregar</button>
+                </div>
+            `;
+            fragment.appendChild(card);
+        });
+
+        cont.innerHTML = "";
+        cont.appendChild(fragment);
+    }
+
+    window.buscarSugerenciasSintomas = async function() {
+        const input = document.getElementById("inputSintomaAsistente");
+        const btn = document.getElementById("btnBuscarSintomas");
+        const estado = document.getElementById("estadoAsistenteSintomas");
+        const lblSuc = document.getElementById("etiquetaSucursalAsistente");
+
+        if (lblSuc) lblSuc.innerText = sucursalActual;
+
+        const sintoma = (input?.value || "").trim();
+        if (!sintoma) {
+            alert("Escribe un síntoma o consulta para buscar sugerencias.");
+            return;
+        }
+
+        const candidatosOrdenados = obtenerProductosVigentesOrdenadosPorVencimiento();
+        if (candidatosOrdenados.length === 0) {
+            renderizarResultadosAsistente([], `Sin productos vigentes con stock en ${sucursalActual}.`);
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "⏳ Buscando...";
+        }
+        if (estado) {
+            estado.innerHTML = "🔄 Ordenando por fecha de vencimiento y consultando sugerencias...";
+        }
+
+        try {
+            const apiKey = await obtenerApiKeyGemini();
+            if (apiKey && navigator.onLine) {
+                const sugerenciasIA = await consultarGeminiSintomas(sintoma, candidatosOrdenados, apiKey);
+                if (sugerenciasIA.length > 0) {
+                    renderizarResultadosAsistente(
+                        sugerenciasIA,
+                        `✅ Sugerencias con <strong>Gemini 2.5 Flash</strong> ordenadas por vencimiento más próximo (${sucursalActual})`
+                    );
+                    return;
+                }
+            }
+
+            const sugerenciasLocales = filtrarLocalPorSintoma(sintoma, candidatosOrdenados);
+            renderizarResultadosAsistente(
+                sugerenciasLocales,
+                `ℹ️ Sugerencias por filtro local ordenadas por vencimiento más próximo (${sucursalActual})`
+            );
+        } catch (err) {
+            console.warn("Fallo IA, usando respaldo local:", err);
+            const sugerenciasLocales = filtrarLocalPorSintoma(sintoma, candidatosOrdenados);
+            renderizarResultadosAsistente(
+                sugerenciasLocales,
+                `⚠️ Respaldo local activo (ordenado por vencimiento más próximo en ${sucursalActual})`
+            );
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "🔍 Sugerir";
+            }
         }
     }
 
@@ -3284,6 +3584,7 @@
 
     function renderizarResumenVentasHoy() {
         const tbody = document.getElementById('listaResumenVentas');
+        if (!tbody) return;
         if (historialVentasDia.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy en ${sucursalReporteFiltro}.</td></tr>`;
             return;
@@ -3294,8 +3595,8 @@
             const tachado = esAnulada ? 'text-decoration: line-through; color:#999;' : '';
 
             const celdaTotales = esAnulada
-                ? `<span class="badge-danger">ANULADA</span><br><small style="color:#666;">Era Q${v.total.toFixed(2)}</small>`
-                : `Total: <strong>Q${v.total.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${v.ganancia.toFixed(2)}</strong>`;
+                ? `<span class="badge-danger">ANULADA</span><br><small style="color:#666;">Era Q${Number(v.total || 0).toFixed(2)}</small>`
+                : `Total: <strong>Q${Number(v.total || 0).toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${Number(v.ganancia || 0).toFixed(2)}</strong>`;
 
             const celdaAccion = esAnulada
                 ? `<small style="color:#C62828; font-weight:bold;">Devuelta</small>`
