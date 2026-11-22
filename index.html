@@ -970,8 +970,8 @@
     let sucursalActual = localStorage.getItem("farmapp_sucursal_activa") || SUCURSAL_DEFAULT;
     let sucursalReporteFiltro = sucursalActual;
 
-    let inventarioTodasSucursales = [];
-    let ventasTodasSucursales = [];
+    let unsubscribeInventario = null;
+    let unsubscribeVentas = null;
 
     let inventarioGlobal = [];
     let inventarioReporteFiltrado = [];
@@ -1096,6 +1096,100 @@
         cambiarSucursalReporte(document.getElementById('filtroSucursalReporte').value);
     }
 
+    function suscribirInventarioSucursal(nombreSucursal) {
+        if (unsubscribeInventario) {
+            unsubscribeInventario();
+            unsubscribeInventario = null;
+        }
+
+        const qInv = query(
+            collection(db, "inventario_farmacia"),
+            where("sucursal", "==", nombreSucursal)
+        );
+
+        unsubscribeInventario = onSnapshot(qInv, (snapshot) => {
+            const listaSucursal = [];
+            snapshot.forEach((docSnap) => {
+                listaSucursal.push(prepararProducto(docSnap));
+            });
+
+            inventarioGlobal = listaSucursal;
+            const nuevoMapa = new Map();
+            const nuevoMapaCodigo = new Map();
+
+            listaSucursal.forEach(item => {
+                nuevoMapa.set(item.id, item);
+                const codLimpio = String(item.codigo || "").trim();
+                if (codLimpio && !nuevoMapaCodigo.has(codLimpio)) {
+                    nuevoMapaCodigo.set(codLimpio, item);
+                }
+            });
+
+            mapaInventario = nuevoMapa;
+            mapaPorCodigo = nuevoMapaCodigo;
+
+            if (sucursalReporteFiltro === nombreSucursal) {
+                inventarioReporteFiltrado = listaSucursal;
+                if (document.getElementById('tab-reportes').classList.contains('active')) {
+                    actualizarReportesInventario(inventarioReporteFiltrado);
+                } else {
+                    reportesDesactualizados = true;
+                }
+            }
+
+            if (document.getElementById('tab-ventas').classList.contains('active')) {
+                renderizarVentas(inventarioGlobal);
+            }
+            if (document.getElementById('tab-inventario').classList.contains('active')) {
+                renderizarInventario(inventarioGlobal);
+                actualizarResumenInventario(inventarioGlobal);
+            }
+
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = `✅ Conectado (${inventarioGlobal.length.toLocaleString()} prod. en ${sucursalActual})`;
+            statusDiv.style.background = "#E8F5E9";
+            statusDiv.style.color = "#2E7D32";
+        }, (error) => {
+            console.error("Error al sincronizar inventario: ", error);
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = `⚠️ Error de conexión con la nube: ${error.code || error.message}`;
+            statusDiv.style.background = "#FFEBEE";
+            statusDiv.style.color = "#C62828";
+        });
+    }
+
+    function suscribirVentasSucursal(nombreSucursalRep) {
+        if (unsubscribeVentas) {
+            unsubscribeVentas();
+            unsubscribeVentas = null;
+        }
+
+        const qVentas = query(
+            collection(db, "ventas_farmacia"),
+            where("sucursal", "==", nombreSucursalRep),
+            orderBy("fechaHora", "desc"),
+            limit(400)
+        );
+
+        unsubscribeVentas = onSnapshot(qVentas, (snapshot) => {
+            const lista = [];
+            snapshot.forEach((docSnap) => {
+                lista.push({ id: docSnap.id, ...docSnap.data() });
+            });
+
+            ventasHistoricasGlobal = lista;
+            sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
+
+            if (document.getElementById('tab-reportes').classList.contains('active')) {
+                renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+            } else {
+                reportesDesactualizados = true;
+            }
+        }, (error) => {
+            console.error("Error al sincronizar ventas (revisa si Firestore pide crear el índice compuesto):", error);
+        });
+    }
+
     window.cambiarSucursalActiva = function(nuevaSucursal) {
         if (!nuevaSucursal) return;
         sucursalActual = nuevaSucursal;
@@ -1110,49 +1204,33 @@
             sucursalReporteFiltro = sucursalActual;
         }
         renderizarSelectoresSucursales(document.getElementById('buscadorSucursalReporte')?.value || "");
-        aplicarSucursalesAEstado();
+        suscribirInventarioSucursal(sucursalActual);
+
+        if (sucursalReporteFiltro === sucursalActual) {
+            suscribirVentasSucursal(sucursalReporteFiltro);
+        }
     }
 
-    window.cambiarSucursalReporte = function(nuevaSucursalRep) {
+    window.cambiarSucursalReporte = async function(nuevaSucursalRep) {
         if (!nuevaSucursalRep) return;
         sucursalReporteFiltro = nuevaSucursalRep;
         actualizarEtiquetasSucursal();
-        aplicarSucursalesAEstado();
+
+        if (sucursalReporteFiltro === sucursalActual) {
+            inventarioReporteFiltrado = inventarioGlobal;
+        } else {
+            const snapInvRep = await getDocs(
+                query(collection(db, "inventario_farmacia"), where("sucursal", "==", sucursalReporteFiltro))
+            );
+            inventarioReporteFiltrado = snapInvRep.docs.map(d => prepararProducto(d));
+        }
+
+        suscribirVentasSucursal(sucursalReporteFiltro);
+
         if (document.getElementById('tab-reportes').classList.contains('active')) {
             actualizarReportesInventario(inventarioReporteFiltrado);
             renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
             reportesDesactualizados = false;
-        }
-    }
-
-    function aplicarSucursalesAEstado() {
-        const filtradosInv = inventarioTodasSucursales.filter(p => p.sucursal === sucursalActual);
-        const nuevoMapa = new Map();
-        const nuevoMapaCodigo = new Map();
-
-        filtradosInv.forEach(item => {
-            nuevoMapa.set(item.id, item);
-            const codLimpio = String(item.codigo || "").trim();
-            if (codLimpio && !nuevoMapaCodigo.has(codLimpio)) {
-                nuevoMapaCodigo.set(codLimpio, item);
-            }
-        });
-
-        inventarioGlobal = filtradosInv;
-        mapaInventario = nuevoMapa;
-        mapaPorCodigo = nuevoMapaCodigo;
-
-        inventarioReporteFiltrado = inventarioTodasSucursales.filter(p => p.sucursal === sucursalReporteFiltro);
-        ventasHistoricasGlobal = ventasTodasSucursales.filter(v => normalizarSucursalDoc(v) === sucursalReporteFiltro);
-
-        sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
-
-        if (document.getElementById('tab-ventas').classList.contains('active')) {
-            renderizarVentas(inventarioGlobal);
-        }
-        if (document.getElementById('tab-inventario').classList.contains('active')) {
-            renderizarInventario(inventarioGlobal);
-            actualizarResumenInventario(inventarioGlobal);
         }
     }
 
@@ -1175,7 +1253,8 @@
             sucursalReporteFiltro = sucursalActual;
         }
         renderizarSelectoresSucursales();
-        aplicarSucursalesAEstado();
+        suscribirInventarioSucursal(sucursalActual);
+        suscribirVentasSucursal(sucursalReporteFiltro);
     }
     cargarSucursales();
 
@@ -1247,8 +1326,18 @@
             return;
         }
 
-        const productosEnSucursal = inventarioTodasSucursales.filter(p => p.sucursal === nombreEliminar).length;
-        const ventasEnSucursal = ventasTodasSucursales.filter(v => normalizarSucursalDoc(v) === nombreEliminar).length;
+        let productosEnSucursal = 0;
+        let ventasEnSucursal = 0;
+        try {
+            const [snapP, snapV] = await Promise.all([
+                getDocs(query(collection(db, "inventario_farmacia"), where("sucursal", "==", nombreEliminar))),
+                getDocs(query(collection(db, "ventas_farmacia"), where("sucursal", "==", nombreEliminar)))
+            ]);
+            productosEnSucursal = snapP.size;
+            ventasEnSucursal = snapV.size;
+        } catch (e) {
+            console.warn("No se pudo obtener conteo previo de la sucursal:", e);
+        }
 
         const borrarEnBaseDatos = confirm(
             `Vas a eliminar la sucursal "${nombreEliminar}".\n\n` +
@@ -1301,7 +1390,8 @@
         }
 
         renderizarSelectoresSucursales(document.getElementById('buscadorSucursalReporte')?.value || "");
-        aplicarSucursalesAEstado();
+        suscribirInventarioSucursal(sucursalActual);
+        suscribirVentasSucursal(sucursalReporteFiltro);
 
         if (borrarEnBaseDatos) {
             alert(
@@ -1611,60 +1701,6 @@
         lector.readAsText(archivo);
     }
 
-    try {
-        const qInv = query(collection(db, "inventario_farmacia"));
-        onSnapshot(qInv, (snapshot) => {
-            const todas = [];
-            snapshot.forEach((docSnap) => {
-                todas.push(prepararProducto(docSnap));
-            });
-            inventarioTodasSucursales = todas;
-            aplicarSucursalesAEstado();
-
-            const statusDiv = document.getElementById('syncStatus');
-            statusDiv.innerHTML = `✅ Conectado (${inventarioGlobal.length.toLocaleString()} prod. en ${sucursalActual} | Total BD: ${inventarioTodasSucursales.length})`;
-            statusDiv.style.background = "#E8F5E9";
-            statusDiv.style.color = "#2E7D32";
-
-            if (document.getElementById('tab-reportes').classList.contains('active')) {
-                actualizarReportesInventario(inventarioReporteFiltrado);
-            } else {
-                reportesDesactualizados = true;
-            }
-        }, (error) => {
-            console.error("Error al sincronizar inventario: ", error);
-            const statusDiv = document.getElementById('syncStatus');
-            statusDiv.innerHTML = `⚠️ Error de conexión con la nube: ${error.code || error.message}`;
-            statusDiv.style.background = "#FFEBEE";
-            statusDiv.style.color = "#C62828";
-        });
-
-        const qVentas = query(
-            collection(db, "ventas_farmacia"),
-            orderBy("fechaHora", "desc"),
-            limit(400)
-        );
-        onSnapshot(qVentas, (snapshot) => {
-            const lista = [];
-            snapshot.forEach((docSnap) => {
-                lista.push({ id: docSnap.id, ...docSnap.data() });
-            });
-            ventasTodasSucursales = lista;
-            ventasHistoricasGlobal = ventasTodasSucursales.filter(v => normalizarSucursalDoc(v) === sucursalReporteFiltro);
-            sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
-
-            if (document.getElementById('tab-reportes').classList.contains('active')) {
-                renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
-            } else {
-                reportesDesactualizados = true;
-            }
-        }, (error) => {
-            console.error("Error al sincronizar ventas:", error);
-        });
-    } catch (e) {
-        console.error("Error al configurar listeners de Firestore:", e);
-    }
-
     window.manejarEnterPin = function(event) {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -1689,7 +1725,7 @@
         cambiarPestaña('ventas');
     }
 
-    window.cambiarPestaña = function(pestaña) {
+    window.cambiarPestaña = async function(pestaña) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         actualizarEtiquetasSucursal();
@@ -1706,6 +1742,14 @@
         } else if (pestaña === 'reportes') {
             document.querySelectorAll('.tab-btn')[2].classList.add('active');
             document.getElementById('tab-reportes').classList.add('active');
+            if (sucursalReporteFiltro === sucursalActual) {
+                inventarioReporteFiltrado = inventarioGlobal;
+            } else if (!inventarioReporteFiltrado || inventarioReporteFiltrado.length === 0) {
+                const snapInvRep = await getDocs(
+                    query(collection(db, "inventario_farmacia"), where("sucursal", "==", sucursalReporteFiltro))
+                );
+                inventarioReporteFiltrado = snapInvRep.docs.map(d => prepararProducto(d));
+            }
             if (reportesDesactualizados) {
                 actualizarReportesInventario(inventarioReporteFiltrado);
                 renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
@@ -2084,7 +2128,7 @@
         });
 
         if (productosOferta.length === 0) {
-            alert(`¡Excelente! No hay productos próximos a vencer (&le; 60 días) en "${sucursalReporteFiltro}".`);
+            alert(`¡Excelente! No hay productos próximos a vencer (<= 60 días) en "${sucursalReporteFiltro}".`);
             document.getElementById('resultadoOfertasContainer').style.display = 'none';
             return;
         }
@@ -2142,6 +2186,7 @@
         try {
             const qRango = query(
                 collection(db, "ventas_farmacia"),
+                where("sucursal", "==", sucursalReporteFiltro),
                 where("fecha", ">=", fechaDesde),
                 where("fecha", "<=", fechaHasta),
                 orderBy("fecha", "desc")
@@ -2149,10 +2194,7 @@
             const snap = await getDocs(qRango);
             const ventasFiltradas = [];
             snap.forEach(d => {
-                const data = { id: d.id, ...d.data() };
-                if (normalizarSucursalDoc(data) === sucursalReporteFiltro) {
-                    ventasFiltradas.push(data);
-                }
+                ventasFiltradas.push({ id: d.id, ...d.data() });
             });
 
             let totalVentaFiltro = 0;
@@ -2169,7 +2211,7 @@
             renderizarReportesDiariosYMensuales(ventasFiltradas);
         } catch (err) {
             console.error("Error filtrando ventas por fecha:", err);
-            alert("No se pudo filtrar por rango de fechas. Revise la consola o el índice en Firestore.");
+            alert("No se pudo filtrar por rango de fechas. Revise la consola o cree el índice compuesto solicitado por Firestore.");
         }
     }
 
@@ -2537,7 +2579,7 @@
         });
 
         if (proximos.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay productos próximos a vencer (&le; 90 días). 🎉</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay productos próximos a vencer (<= 90 días). 🎉</td></tr>`;
             return;
         }
 
@@ -3001,4 +3043,4 @@
 </script>
 
 </body>
-</html>
+                </html>
