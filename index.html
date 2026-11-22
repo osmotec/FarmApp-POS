@@ -638,7 +638,7 @@
                 </p>
                 <div class="row" style="gap: 8px; align-items: center;">
                     <div class="col">
-                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. dolor de cabeza y fiebre, tos, acidez, alergia..." onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
+                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. dolor de cabeza y fiebre, tos, acidez, alergia..." oninput="if(this.value.trim()===''){limpiarResultadosAsistente();}" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
                     </div>
                     <div style="flex: 0 0 auto;">
                         <button type="button" class="btn" id="btnBuscarSintomas" style="margin-top: 0; width: auto; padding: 10px 14px;" onclick="buscarSugerenciasSintomas()">
@@ -647,6 +647,14 @@
                     </div>
                 </div>
                 <div id="estadoAsistenteSintomas" style="font-size: 0.78rem; color: #555; margin-top: 6px;"></div>
+                <div id="barraControlesAsistente" style="display: none; justify-content: flex-end; gap: 6px; margin-top: 8px;">
+                    <button type="button" id="btnToggleResultadosSintomas" onclick="toggleResultadosAsistente()" style="background: #e3f2fd; color: #0D47A1; border: 1px solid #90caf9; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">
+                        ▲ Ocultar
+                    </button>
+                    <button type="button" onclick="limpiarResultadosAsistente()" style="background: #ffebee; color: #C62828; border: 1px solid #ef9a9a; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">
+                        ✕ Limpiar
+                    </button>
+                </div>
                 <div id="resultadosAsistenteSintomas" style="margin-top: 8px;"></div>
             </div>
 
@@ -1562,10 +1570,7 @@
         limiteActualInventario = LIMITE_FILAS_TABLA;
         limiteActualVentas = LIMITE_FILAS_TABLA;
 
-        const contSintomas = document.getElementById("resultadosAsistenteSintomas");
-        const estadoSintomas = document.getElementById("estadoAsistenteSintomas");
-        if (contSintomas) contSintomas.innerHTML = "";
-        if (estadoSintomas) estadoSintomas.innerHTML = "";
+        limpiarResultadosAsistente();
 
         if (!sucursalesDisponibles.includes(sucursalReporteFiltro)) {
             sucursalReporteFiltro = sucursalActual;
@@ -1987,6 +1992,36 @@
     }
 
     /* --- ASISTENTE DE SÍNTOMAS (ORDEN POR VENCIMIENTO + GEMINI 2.5 FLASH + RESPALDO LOCAL) --- */
+    window.toggleResultadosAsistente = function() {
+        const cont = document.getElementById("resultadosAsistenteSintomas");
+        const btn = document.getElementById("btnToggleResultadosSintomas");
+        if (!cont || !btn) return;
+
+        const estaOculto = cont.style.display === "none";
+        cont.style.display = estaOculto ? "block" : "none";
+        btn.innerText = estaOculto ? "▲ Ocultar" : "▼ Mostrar";
+    }
+
+    window.limpiarResultadosAsistente = function() {
+        const cont = document.getElementById("resultadosAsistenteSintomas");
+        const estado = document.getElementById("estadoAsistenteSintomas");
+        const barra = document.getElementById("barraControlesAsistente");
+        const btn = document.getElementById("btnToggleResultadosSintomas");
+
+        if (cont) {
+            cont.innerHTML = "";
+            cont.style.display = "block";
+        }
+        if (estado) estado.innerHTML = "";
+        if (barra) barra.style.display = "none";
+        if (btn) btn.innerText = "▲ Ocultar";
+    }
+
+    window.agregarSugerenciaYRetraer = function(prodId, modoPresentacion = "Unidad") {
+        agregarAlCarrito(prodId, modoPresentacion);
+        limpiarResultadosAsistente();
+    }
+
     function obtenerProductosVigentesOrdenadosPorVencimiento() {
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
@@ -2157,14 +2192,21 @@
     function renderizarResultadosAsistente(items, origenTexto) {
         const cont = document.getElementById("resultadosAsistenteSintomas");
         const estado = document.getElementById("estadoAsistenteSintomas");
+        const barra = document.getElementById("barraControlesAsistente");
+        const btnToggle = document.getElementById("btnToggleResultadosSintomas");
         if (!cont || !estado) return;
 
         estado.innerHTML = origenTexto;
+        cont.style.display = "block";
+        if (btnToggle) btnToggle.innerText = "▲ Ocultar";
 
         if (!items || items.length === 0) {
+            if (barra) barra.style.display = "none";
             cont.innerHTML = `<div style="font-size:0.82rem; color:#777; padding:6px;">No se encontraron productos vigentes con stock para ese síntoma en ${sucursalActual}.</div>`;
             return;
         }
+
+        if (barra) barra.style.display = "flex";
 
         const fragment = document.createDocumentFragment();
         items.slice(0, 8).forEach(({ prod, diasRestantes, precioUnidad, stockTexto, motivoBreve }) => {
@@ -2188,7 +2230,7 @@
                     ${motivoHtml}
                 </div>
                 <div style="flex:0 0 auto;">
-                    <button type="button" class="btn-sell" style="padding:7px 10px; width:auto;" onclick="agregarAlCarrito('${prod.id}', 'Unidad')">+ Agregar</button>
+                    <button type="button" class="btn-sell" style="padding:7px 10px; width:auto;" onclick="agregarSugerenciaYRetraer('${prod.id}', 'Unidad')">+ Agregar</button>
                 </div>
             `;
             fragment.appendChild(card);
