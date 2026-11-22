@@ -868,10 +868,11 @@
                             <th>N° / Hora</th>
                             <th>Productos Vendidos</th>
                             <th>Total Venta / Ganancia</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody id="listaResumenVentas">
-                        <tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy.</td></tr>
+                        <tr><td colspan="4" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1817,25 +1818,37 @@
 
         let ingresosHoy = 0;
         let gananciaHoy = 0;
+        let cantidadActivas = 0;
         const historialHoy = [];
 
         ventasHoy.forEach((v, idx) => {
+            const estaAnulada = v.estado === 'anulada';
             const tot = Number(v.total) || 0;
             const gan = Number(v.ganancia) || 0;
-            ingresosHoy += tot;
-            gananciaHoy += gan;
+
+            if (!estaAnulada) {
+                ingresosHoy += tot;
+                gananciaHoy += gan;
+                cantidadActivas++;
+            }
+
             historialHoy.unshift({
+                id: v.id || '',
+                idLocal: v.idLocal || '',
                 numero: idx + 1,
                 hora: v.hora || "",
                 productos: v.productos || "",
+                detalleItems: Array.isArray(v.detalleItems) ? v.detalleItems : [],
                 total: tot,
-                ganancia: gan
+                ganancia: gan,
+                estado: estaAnulada ? 'anulada' : 'activa',
+                anuladaEn: v.anuladaEn || ""
             });
         });
 
         corteCajaIngresos = ingresosHoy;
         corteCajaGanancia = gananciaHoy;
-        corteCajaCantidad = ventasHoy.length;
+        corteCajaCantidad = cantidadActivas;
         historialVentasDia = historialHoy;
 
         document.getElementById('corteIngresos').innerText = `Q${corteCajaIngresos.toFixed(2)}`;
@@ -1843,6 +1856,107 @@
         document.getElementById('corteTotalVentas').innerText = corteCajaCantidad;
         recalcularCuadreTeorico();
         renderizarResumenVentasHoy();
+    }
+
+    window.anularVentaHoy = async function(ventaId, ventaIdLocal) {
+        const pinIngresado = prompt("🔐 Ingrese el PIN de Administrador para anular esta venta:");
+        if (pinIngresado === null) return;
+        if (pinIngresado.trim() !== pinActualSistema) {
+            alert("PIN de administrador incorrecto. No se anuló la venta.");
+            return;
+        }
+
+        const ventaObj = historialVentasDia.find(
+            item => (ventaId && item.id === ventaId) || (ventaIdLocal && item.idLocal === ventaIdLocal)
+        );
+        if (!ventaObj) {
+            alert("No se encontró el registro de la venta.");
+            return;
+        }
+        if (ventaObj.estado === 'anulada') {
+            alert("Esta venta ya fue anulada anteriormente.");
+            return;
+        }
+
+        const confirmar = confirm(
+            `¿Confirmas ANULAR la venta #${ventaObj.numero} (${ventaObj.hora}) por Q${ventaObj.total.toFixed(2)}?\n` +
+            `• Se devolverán las unidades al inventario de "${sucursalReporteFiltro}".\n` +
+            `• Se descontará del corte y reportes.`
+        );
+        if (!confirmar) return;
+
+        if (!ventaId && ventaIdLocal) {
+            const pendientes = leerVentasPendientes().filter(v => v.idLocal !== ventaIdLocal);
+            guardarVentasPendientes(pendientes);
+            ventasHistoricasGlobal = ventasHistoricasGlobal.filter(v => v.idLocal !== ventaIdLocal);
+            sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
+            renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+            alert("Venta pendiente local eliminada/anulada.");
+            return;
+        }
+
+        if (!navigator.onLine) {
+            alert("Necesitas conexión a Internet para anular y devolver stock en la nube.");
+            return;
+        }
+
+        try {
+            const ventaRef = doc(db, "ventas_farmacia", ventaId);
+            const snapVenta = await conTimeout(getDoc(ventaRef), 8000, "Tiempo agotado al leer la venta");
+            if (!snapVenta.exists()) {
+                alert("La venta ya no existe en la base de datos.");
+                return;
+            }
+
+            const dataVenta = snapVenta.data();
+            if (dataVenta.estado === 'anulada') {
+                alert("Esta venta ya figura como anulada en la nube.");
+                return;
+            }
+
+            const batch = writeBatch(db);
+            const detalles = Array.isArray(dataVenta.detalleItems) ? dataVenta.detalleItems : [];
+
+            for (const det of detalles) {
+                const unidadesDevolver = Number(det.unidades) || Number(det.cantidad) || 0;
+                if (unidadesDevolver <= 0) continue;
+
+                const prodMatch = inventarioReporteFiltrado.find(
+                    p => String(p.nombre || "").trim().toLowerCase() === String(det.nombre || "").trim().toLowerCase()
+                );
+
+                if (prodMatch && prodMatch.id) {
+                    const prodRef = doc(db, "inventario_farmacia", prodMatch.id);
+                    const snapProd = await conTimeout(getDoc(prodRef), 8000, "Tiempo agotado al leer producto");
+                    if (snapProd.exists()) {
+                        const actualStock = Number(snapProd.data().cantidad) || 0;
+                        const actualVendidos = Number(snapProd.data().vendidos) || 0;
+                        batch.update(prodRef, {
+                            cantidad: actualStock + unidadesDevolver,
+                            vendidos: Math.max(0, actualVendidos - unidadesDevolver),
+                            actualizado: new Date().toISOString()
+                        });
+                    }
+                }
+            }
+
+            batch.update(ventaRef, {
+                estado: "anulada",
+                anuladaEn: new Date().toISOString()
+            });
+
+            await conTimeout(batch.commit(), 10000, "Tiempo agotado al guardar la anulación");
+
+            ventasHistoricasGlobal = ventasHistoricasGlobal.map(v =>
+                v.id === ventaId ? { ...v, estado: "anulada", anuladaEn: new Date().toISOString() } : v
+            );
+            sincronizarCorteHoyDesdeVentas(ventasHistoricasGlobal);
+            renderizarReportesDiariosYMensuales(ventasHistoricasGlobal);
+            alert(`Venta #${ventaObj.numero} anulada y stock devuelto correctamente.`);
+        } catch (err) {
+            console.error("Error al anular venta:", err);
+            alert(`No se pudo anular la venta: ${err.message || err}`);
+        }
     }
 
     async function cargarConfiguracionPin() {
@@ -2589,6 +2703,7 @@
             const nuevaVentaRef = doc(collection(db, "ventas_farmacia"));
             batch.set(nuevaVentaRef, {
                 sucursal: sucursalActual,
+                estado: "activa",
                 fechaHora: ahora.toISOString(),
                 fecha: fechaIso,
                 mes: mesIso,
@@ -2615,6 +2730,7 @@
                 const ventaPendienteObj = {
                     idLocal: `offline_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
                     sucursal: sucursalActual,
+                    estado: "activa",
                     fechaHora: ahora.toISOString(),
                     fecha: fechaIso,
                     mes: mesIso,
@@ -2748,7 +2864,7 @@
         }
 
         const ventasFiltradas = baseVentas
-            .filter(v => v.fecha && v.fecha >= fechaDesde && v.fecha <= fechaHasta)
+            .filter(v => v.estado !== 'anulada' && v.fecha && v.fecha >= fechaDesde && v.fecha <= fechaHasta)
             .sort((a, b) => String(b.fechaHora || b.fecha || "").localeCompare(String(a.fechaHora || a.fecha || "")));
 
         let totalVentaFiltro = 0;
@@ -2773,19 +2889,20 @@
     }
 
     window.exportarPdfDias = function() {
-        if (!ventasHistoricasGlobal || ventasHistoricasGlobal.length === 0) {
-            alert(`No hay ventas registradas en "${sucursalReporteFiltro}" para generar el reporte diario.`);
+        const ventasValidas = (ventasHistoricasGlobal || []).filter(v => v.estado !== 'anulada');
+        if (ventasValidas.length === 0) {
+            alert(`No hay ventas activas registradas en "${sucursalReporteFiltro}" para generar el reporte diario.`);
             return;
         }
 
         let agrupadoDias = {};
-        ventasHistoricasGlobal.forEach(v => {
+        ventasValidas.forEach(v => {
             const dia = v.fecha || 'Fecha Desconocida';
             if (!agrupadoDias[dia]) {
                 agrupadoDias[dia] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
             }
-            agrupadoDias[dia].totalVenta += v.total;
-            agrupadoDias[dia].totalGanancia += v.ganancia;
+            agrupadoDias[dia].totalVenta += Number(v.total) || 0;
+            agrupadoDias[dia].totalGanancia += Number(v.ganancia) || 0;
 
             if (v.detalleItems && Array.isArray(v.detalleItems)) {
                 v.detalleItems.forEach(item => {
@@ -2839,19 +2956,20 @@
     }
 
     window.exportarPdfMeses = function() {
-        if (!ventasHistoricasGlobal || ventasHistoricasGlobal.length === 0) {
-            alert(`No hay ventas registradas en "${sucursalReporteFiltro}" para generar el reporte mensual.`);
+        const ventasValidas = (ventasHistoricasGlobal || []).filter(v => v.estado !== 'anulada');
+        if (ventasValidas.length === 0) {
+            alert(`No hay ventas activas registradas en "${sucursalReporteFiltro}" para generar el reporte mensual.`);
             return;
         }
 
         let agrupadoMeses = {};
-        ventasHistoricasGlobal.forEach(v => {
+        ventasValidas.forEach(v => {
             const mes = v.mes || '2026-00';
             if (!agrupadoMeses[mes]) {
                 agrupadoMeses[mes] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
             }
-            agrupadoMeses[mes].totalVenta += v.total;
-            agrupadoMeses[mes].totalGanancia += v.ganancia;
+            agrupadoMeses[mes].totalVenta += Number(v.total) || 0;
+            agrupadoMeses[mes].totalGanancia += Number(v.ganancia) || 0;
 
             if (v.detalleItems && Array.isArray(v.detalleItems)) {
                 v.detalleItems.forEach(item => {
@@ -3167,16 +3285,31 @@
     function renderizarResumenVentasHoy() {
         const tbody = document.getElementById('listaResumenVentas');
         if (historialVentasDia.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy en ${sucursalReporteFiltro}.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">Aún no hay ventas registradas hoy en ${sucursalReporteFiltro}.</td></tr>`;
             return;
         }
         const fragment = document.createDocumentFragment();
         historialVentasDia.forEach((v) => {
+            const esAnulada = v.estado === 'anulada';
+            const tachado = esAnulada ? 'text-decoration: line-through; color:#999;' : '';
+
+            const celdaTotales = esAnulada
+                ? `<span class="badge-danger">ANULADA</span><br><small style="color:#666;">Era Q${v.total.toFixed(2)}</small>`
+                : `Total: <strong>Q${v.total.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${v.ganancia.toFixed(2)}</strong>`;
+
+            const celdaAccion = esAnulada
+                ? `<small style="color:#C62828; font-weight:bold;">Devuelta</small>`
+                : `<button class="btn-danger" style="padding:5px 8px; font-size:0.74rem;" onclick="anularVentaHoy('${v.id}', '${v.idLocal}')">↩️ Anular</button>`;
+
             const tr = document.createElement('tr');
+            if (esAnulada) {
+                tr.setAttribute('style', 'background:#fff5f5; opacity:0.85;');
+            }
             tr.innerHTML = `
                 <td><strong>#${v.numero}</strong><br><small style="color:#666;">🕒 ${v.hora}</small></td>
-                <td><small>${v.productos}</small></td>
-                <td>Total: <strong>Q${v.total.toFixed(2)}</strong><br><strong style="color:var(--success);">Ganancia: Q${v.ganancia.toFixed(2)}</strong></td>
+                <td><small style="${tachado}">${v.productos}</small></td>
+                <td>${celdaTotales}</td>
+                <td>${celdaAccion}</td>
             `;
             fragment.appendChild(tr);
         });
@@ -3188,29 +3321,31 @@
         const tbodyDia = document.getElementById('listaVentasPorDia');
         const tbodyMes = document.getElementById('listaVentasPorMes');
 
-        if (!ventas || ventas.length === 0) {
-            tbodyDia.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en ${sucursalReporteFiltro} para este período.</td></tr>`;
-            tbodyMes.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros en ${sucursalReporteFiltro} para este período.</td></tr>`;
+        const ventasActivas = (ventas || []).filter(v => v.estado !== 'anulada');
+
+        if (ventasActivas.length === 0) {
+            tbodyDia.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros activos en ${sucursalReporteFiltro} para este período.</td></tr>`;
+            tbodyMes.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777;">No hay registros activos en ${sucursalReporteFiltro} para este período.</td></tr>`;
             return;
         }
 
         let agrupadoDias = {};
         let agrupadoMeses = {};
 
-        ventas.forEach(v => {
+        ventasActivas.forEach(v => {
             const dia = v.fecha || 'Fecha Desconocida';
             if (!agrupadoDias[dia]) {
                 agrupadoDias[dia] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
             }
-            agrupadoDias[dia].totalVenta += v.total;
-            agrupadoDias[dia].totalGanancia += v.ganancia;
+            agrupadoDias[dia].totalVenta += Number(v.total) || 0;
+            agrupadoDias[dia].totalGanancia += Number(v.ganancia) || 0;
 
             const mes = v.mes || '2026-00';
             if (!agrupadoMeses[mes]) {
                 agrupadoMeses[mes] = { totalVenta: 0, totalGanancia: 0, productosMap: {} };
             }
-            agrupadoMeses[mes].totalVenta += v.total;
-            agrupadoMeses[mes].totalGanancia += v.ganancia;
+            agrupadoMeses[mes].totalVenta += Number(v.total) || 0;
+            agrupadoMeses[mes].totalGanancia += Number(v.ganancia) || 0;
 
             if (v.detalleItems && Array.isArray(v.detalleItems)) {
                 v.detalleItems.forEach(item => {
