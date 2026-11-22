@@ -447,11 +447,11 @@
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
                 <span>Efectivo Recibido:</span>
-                <span id="cartaEfectivoTexto" style="white-space: nowrap;">Q0.00</strong>
+                <span id="cartaEfectivoTexto" style="white-space: nowrap;">Q0.00</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; font-weight: bold; color: #0D47A1;">
                 <span>Su Vuelto:</span>
-                <span id="cartaVueltoTexto" style="white-space: nowrap;">Q0.00</strong>
+                <span id="cartaVueltoTexto" style="white-space: nowrap;">Q0.00</span>
             </div>
         </div>
     </div>
@@ -638,7 +638,7 @@
                 </p>
                 <div class="row" style="gap: 8px; align-items: center;">
                     <div class="col">
-                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. infección urinaria, presión alta, gripe, gastritis, dolor de cabeza..." oninput="if(this.value.trim()===''){limpiarResultadosAsistente();}" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
+                        <input type="text" id="inputSintomaAsistente" placeholder="Ej. infección urinaria, presión alta, colesterol, gastritis, anemia..." oninput="if(this.value.trim()===''){limpiarResultadosAsistente();}" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarSugerenciasSintomas();}">
                     </div>
                     <div style="flex: 0 0 auto;">
                         <button type="button" class="btn" id="btnBuscarSintomas" style="margin-top: 0; width: auto; padding: 10px 14px;" onclick="buscarSugerenciasSintomas()">
@@ -1991,7 +1991,7 @@
         }
     }
 
-    /* --- ASISTENTE DE ENFERMEDADES Y SÍNTOMAS (ORDEN POR VENCIMIENTO + GEMINI 2.5 FLASH + RESPALDO LOCAL) --- */
+    /* --- ASISTENTE DE ENFERMEDADES Y SÍNTOMAS (ORDEN POR VENCIMIENTO + GEMINI 2.5 FLASH + RESPALDO LOCAL AMPLIADO) --- */
     window.toggleResultadosAsistente = function() {
         const cont = document.getElementById("resultadosAsistenteSintomas");
         const btn = document.getElementById("btnToggleResultadosSintomas");
@@ -2086,33 +2086,51 @@
 
         const mapaEnfermedadesYSintomas = {
             fiebre: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "dipirona", "antipiretico"],
-            dolor: ["ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "diclofenaco", "ketorolaco", "naproxeno", "meloxicam", "tramadol"],
+            dolor: ["ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "diclofenaco", "ketorolaco", "naproxeno", "meloxicam", "tramadol", "celecoxib"],
             cabeza: ["paracetamol", "acetaminofen", "ibuprofeno", "ibuprofena", "aspirina", "acido acetilsalicilico", "ergotamina", "sumatriptan"],
             migrana: ["ergotamina", "sumatriptan", "ibuprofeno", "ibuprofena", "paracetamol", "acetaminofen", "naproxeno"],
             garganta: ["ambroxol", "loratadina", "cetirizina", "ibuprofeno", "ibuprofena", "benzidamina", "clorhexidina", "pastilla", "jarabe"],
             tos: ["ambroxol", "bromhexina", "dextrometorfano", "guaifenesina", "acetilcisteina", "jarabe", "bronco"],
-            bronquitis: ["ambroxol", "bromhexina", "acetilcisteina", "azitromicina", "amoxicilina", "salbutamol", "inhalador"],
+            bronquitis: ["ambroxol", "bromhexina", "acetilcisteina", "azitromicina", "amoxicilina", "salbutamol", "inhalador", "budesonida"],
             gripe: ["loratadina", "cetirizina", "clorfeniramina", "paracetamol", "acetaminofen", "fenilefrina", "antigripal"],
             resfriado: ["loratadina", "cetirizina", "clorfeniramina", "paracetamol", "acetaminofen", "fenilefrina", "antigripal"],
-            alergia: ["loratadina", "cetirizina", "clorfeniramina", "fexofenadina", "desloratadina", "levocetirizina"],
+            sinusitis: ["loratadina", "cetirizina", "fluticasona", "oximetazolina", "amoxicilina", "azitromicina", "descongestionante"],
+            rinitis: ["loratadina", "cetirizina", "fexofenadina", "desloratadina", "levocetirizina", "fluticasona", "mometasona"],
+            alergia: ["loratadina", "cetirizina", "clorfeniramina", "fexofenadina", "desloratadina", "levocetirizina", "hidrocortisona"],
             estomago: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "antiacido", "bismuto", "hioscina", "simeticona", "magnesia"],
-            acidez: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "antiacido", "famotidina", "magnesia"],
+            acidez: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "antiacido", "famotidina", "magnesia", "alginato"],
             gastritis: ["omeprazol", "esomeprazol", "lansoprazol", "pantoprazol", "sucralfato", "bismuto", "antiacido"],
-            colico: ["hioscina", "butilhioscina", "ibuprofeno", "ibuprofena", "paracetamol", "diclofenaco"],
-            diarrea: ["loperamida", "bismuto", "suero", "electrolitos", "sales de rehidratacion", "nifuroxazida", "probiotico"],
+            colico: ["hioscina", "butilhioscina", "ibuprofeno", "ibuprofena", "paracetamol", "diclofenaco", "trimebutina"],
+            diarrea: ["loperamida", "bismuto", "suero", "electrolitos", "sales de rehidratacion", "nifuroxazida", "probiotico", "racecadotrilo"],
             vomito: ["dimenhydrinato", "dimenidrinato", "metoclopramida", "ondansetron", "suero"],
-            infeccion: ["amoxicilina", "azitromicina", "ciprofloxacino", "cefalexina", "trimetoprim", "sulfametoxazol", "doxiciclina", "claritromicina"],
-            urinaria: ["ciprofloxacino", "trimetoprim", "sulfametoxazol", "nitrofurantoina", "fenazopiridina", "norfloxacino"],
-            presion: ["losartan", "enalapril", "valsartan", "amlodipino", "amlodipina", "hidroclorotiazida", "atenolol", "telmisartan"],
-            hipertension: ["losartan", "enalapril", "valsartan", "amlodipino", "amlodipina", "hidroclorotiazida", "atenolol", "telmisartan"],
-            diabetes: ["metformina", "glibenclamida", "glimepirida", "sitagliptina", "insulina"],
+            deshidratacion: ["suero", "electrolitos", "sales de rehidratacion", "potasio", "sodio"],
+            infeccion: ["amoxicilina", "azitromicina", "ciprofloxacino", "cefalexina", "trimetoprim", "sulfametoxazol", "doxiciclina", "claritromicina", "levofloxacino"],
+            urinaria: ["ciprofloxacino", "trimetoprim", "sulfametoxazol", "nitrofurantoina", "fenazopiridina", "norfloxacino", "fosfomicina"],
+            presion: ["losartan", "enalapril", "valsartan", "amlodipino", "amlodipina", "hidroclorotiazida", "atenolol", "telmisartan", "irbesartan"],
+            hipertension: ["losartan", "enalapril", "valsartan", "amlodipino", "amlodipina", "hidroclorotiazida", "atenolol", "telmisartan", "irbesartan"],
+            diabetes: ["metformina", "glibenclamida", "glimepirida", "sitagliptina", "insulina", "empagliflozina", "linagliptina"],
             azucar: ["metformina", "glibenclamida", "glimepirida", "insulina"],
-            hongos: ["clotrimazol", "ketoconazol", "fluconazol", "terbinafina", "miconazol", "nistatina"],
-            parasitos: ["albendazol", "mebendazol", "nitazoxanida", "secnidazol", "metronidazol"],
+            colesterol: ["atorvastatina", "simvastatina", "rosuvastatina", "pravastatina", "ezetimiba", "gemfibrozilo", "bezafibrato"],
+            trigliceridos: ["gemfibrozilo", "bezafibrato", "fenofibrato", "omega", "atorvastatina"],
+            hongos: ["clotrimazol", "ketoconazol", "fluconazol", "terbinafina", "miconazol", "nistatina", "itraconazol"],
+            parasitos: ["albendazol", "mebendazol", "nitazoxanida", "secnidazol", "metronidazol", "ivermectina"],
             ojos: ["tobramicina", "ciprofloxacino", "gentamicina", "hipromelosa", "lagrimas", "oftalmica", "gotas"],
-            conjuntivitis: ["tobramicina", "ciprofloxacino", "gentamicina", "oftalmica", "gotas"],
-            piel: ["clotrimazol", "hidrocortisona", "mupirocina", "bacitracina", "ketoconazol", "crema", "unguento"],
-            quemadura: ["sulfadiazina", "aloe", "hidrocortisona", "pantenol", "crema"]
+            conjuntivitis: ["tobramicina", "ciprofloxacino", "gentamicina", "oftalmica", "gotas", "olopatadina"],
+            piel: ["clotrimazol", "hidrocortisona", "mupirocina", "bacitracina", "ketoconazol", "betametasona", "crema", "unguento"],
+            quemadura: ["sulfadiazina", "aloe", "hidrocortisona", "pantenol", "crema", "plata"],
+            acne: ["peroxido de benzoilo", "clindamicina", "adapaleno", "tretinoina", "eritromicina", "doxiciclina"],
+            herpes: ["aciclovir", "valaciclovir", "crema"],
+            reuma: ["ibuprofeno", "ibuprofena", "diclofenaco", "naproxeno", "meloxicam", "celecoxib", "prednisona", "glucosamina"],
+            artritis: ["ibuprofeno", "ibuprofena", "diclofenaco", "naproxeno", "meloxicam", "celecoxib", "prednisona"],
+            varices: ["diosmina", "hesperidina", "castano de indias", "rutina", "gel"],
+            circulacion: ["diosmina", "hesperidina", "aspirina", "acido acetilsalicilico", "pentoxifilina", "ginkgo"],
+            hemorroides: ["diosmina", "hesperidina", "hidrocortisona", "lidocaina", "supositorio", "unguento"],
+            ansiedad: ["alprazolam", "clonazepam", "diazepam", "lorazepam", "passiflora", "valeriana", "sertralina"],
+            insomnio: ["melatonina", "valeriana", "difenhidramina", "zolpidem", "clonazepam"],
+            anemia: ["hierro", "sulfato ferroso", "fumarato ferroso", "acido folico", "vitamina b12", "cianocobalamina", "complejo b"],
+            tiroides: ["levotiroxina"],
+            prostata: ["tamsulosina", "finasterida", "doxazosina", "saw palmetto"],
+            rinon: ["citrato de potasio", "hioscina", "tamsulosina", "ciprofloxacino"]
         };
 
         const palabras = q.split(/[^a-z0-9]+/).filter((p) => p.length >= 2);
