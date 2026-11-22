@@ -179,7 +179,7 @@
             overflow-y: auto;
             border: 1px solid var(--border);
             border-radius: 6px;
-            margin-top: 10px;
+            margin-top: 8px;
             background: white;
         }
 
@@ -351,6 +351,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -554,6 +555,13 @@
 
             <div class="search-box">
                 <input type="text" id="buscador" placeholder="🔍 Buscar por nombre, código, estante o proveedor... (Presione Enter para limpiar)" oninput="filtrarProductosConDebounce()" onkeydown="chequearEnterBuscadorInventario(event)">
+            </div>
+
+            <!-- Botón Exportar a Excel colocado encima de la tabla -->
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                <button type="button" id="btnExportarExcel" onclick="exportarInventarioExcel()" style="background-color: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
+                    📊 Exportar a Excel
+                </button>
             </div>
 
             <div class="tabla-scroll">
@@ -1429,6 +1437,76 @@
         }
     }
 
+    window.exportarInventarioExcel = function() {
+        if (typeof XLSX === "undefined") {
+            alert("La librería de Excel aún está cargando. Intenta de nuevo en unos segundos.");
+            return;
+        }
+
+        const textoBusqueda = (document.getElementById('buscador')?.value || "").trim().toLowerCase();
+        const listaBase = textoBusqueda
+            ? inventarioGlobal.filter(p => (p._busqueda || "").includes(textoBusqueda))
+            : inventarioGlobal;
+
+        if (!listaBase || listaBase.length === 0) {
+            alert(`No hay productos para exportar en "${sucursalActual}".`);
+            return;
+        }
+
+        const filas = listaBase.map((p, idx) => {
+            const stock = Number(p.cantidad) || 0;
+            const costo = Number(p.precioCosto) || 0;
+            const venta = Number(p.precioVenta) || 0;
+            const estado = calcularEstado(p.vencimiento, stock);
+
+            return {
+                "No.": idx + 1,
+                "Código": p.codigo || "",
+                "Producto": p.nombre || "",
+                "Lote": p.lote || "N/D",
+                "Estante": p.estante || "General",
+                "Proveedor": p.proveedor || "General",
+                "Tipo Empaque": p.tipoEmpaque || "Unidad",
+                "Unid. por Caja": p.tipoEmpaque === "Caja" ? (Number(p.unidadesPorCaja) || 1) : 1,
+                "Stock": stock,
+                "Costo Unitario (Q)": Number(costo.toFixed(2)),
+                "Precio Venta (Q)": Number(venta.toFixed(2)),
+                "Total Costo (Q)": Number((stock * costo).toFixed(2)),
+                "Total Venta (Q)": Number((stock * venta).toFixed(2)),
+                "Vencimiento": p.vencimiento || "",
+                "Estado": estado.texto,
+                "Sucursal": p.sucursal || sucursalActual
+            };
+        });
+
+        const hoja = XLSX.utils.json_to_sheet(filas);
+        hoja["!cols"] = [
+            { wch: 6 },
+            { wch: 16 },
+            { wch: 32 },
+            { wch: 12 },
+            { wch: 14 },
+            { wch: 20 },
+            { wch: 14 },
+            { wch: 14 },
+            { wch: 10 },
+            { wch: 16 },
+            { wch: 16 },
+            { wch: 16 },
+            { wch: 16 },
+            { wch: 14 },
+            { wch: 16 },
+            { wch: 26 }
+        ];
+
+        const libro = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libro, hoja, "Inventario");
+
+        const hoy = new Date().toISOString().slice(0, 10);
+        const sucursalLimpia = sucursalActual.replace(/[^a-zA-Z0-9_-]/g, "_");
+        XLSX.writeFile(libro, `Inventario_${sucursalLimpia}_${hoy}.xlsx`);
+    }
+
     window.descargarRespaldoInventario = function() {
         if (!inventarioGlobal || inventarioGlobal.length === 0) {
             alert("No hay productos en el inventario de la sucursal actual para respaldar.");
@@ -1684,7 +1762,6 @@
         }
 
         const btnGuardar = document.getElementById('btnGuardar');
-        const textoPrevio = btnGuardar.innerText;
         btnGuardar.disabled = true;
         btnGuardar.innerText = "Guardando...";
 
