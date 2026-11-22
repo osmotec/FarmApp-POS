@@ -246,6 +246,14 @@
             background: #FFF3E0;
             color: #E65100;
         }
+        .footer-propiedad {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #666666;
+            padding: 10px 8px 4px 8px;
+            margin-top: 14px;
+            border-top: 1px dashed #d3d3d3;
+        }
 
         #modalPin {
             position: fixed;
@@ -275,34 +283,23 @@
             display: none;
         }
 
+        @page {
+            size: 21.5cm 27.9cm portrait;
+            margin: 0.8cm;
+        }
+
         @media print {
-            body * {
-                visibility: hidden !important;
-            }
-
-            body.modo-impresion-termica,
-            body.modo-impresion-termica #ticketImpresion,
-            body.modo-impresion-termica #ticketImpresion * {
-                visibility: visible !important;
-            }
-
-            body.modo-impresion-carta,
-            body.modo-impresion-carta #facturaCartaImpresion,
-            body.modo-impresion-carta #facturaCartaImpresion * {
-                visibility: visible !important;
-            }
-
-            body.modo-impresion-pdf,
-            body.modo-impresion-pdf #reportePdfImpresion,
-            body.modo-impresion-pdf #reportePdfImpresion * {
-                visibility: visible !important;
+            #modalPin,
+            .container,
+            #ticketImpresion,
+            #facturaCartaImpresion,
+            #reportePdfImpresion {
+                display: none !important;
             }
 
             body.modo-impresion-termica #ticketImpresion {
                 display: block !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+                position: static !important;
                 width: 76mm !important;
                 box-sizing: border-box !important;
                 font-family: 'Courier New', Courier, monospace !important;
@@ -325,22 +322,39 @@
 
             body.modo-impresion-carta #facturaCartaImpresion {
                 display: block !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+                position: static !important;
+                width: 19.9cm !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                margin: 0 auto !important;
+                padding: 0.4cm 0.5cm !important;
+                box-sizing: border-box !important;
+                font-family: Arial, Helvetica, sans-serif !important;
+                font-size: 11px !important;
+                line-height: 1.35 !important;
+                color: #000000 !important;
+                background: #ffffff !important;
+            }
+
+            body.modo-impresion-carta #facturaCartaImpresion * {
+                box-sizing: border-box !important;
+                max-width: 100% !important;
+            }
+
+            body.modo-impresion-carta #facturaCartaImpresion table {
                 width: 100% !important;
-                font-family: Arial, sans-serif !important;
-                font-size: 12px !important;
-                color: #000 !important;
-                padding: 15px !important;
-                background: white !important;
+                table-layout: fixed !important;
+                word-wrap: break-word !important;
+            }
+
+            body.modo-impresion-carta #facturaCartaImpresion th,
+            body.modo-impresion-carta #facturaCartaImpresion td {
+                overflow-wrap: anywhere !important;
             }
 
             body.modo-impresion-pdf #reportePdfImpresion {
                 display: block !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+                position: static !important;
                 width: 100% !important;
                 font-family: Arial, sans-serif !important;
                 font-size: 12px !important;
@@ -377,56 +391,57 @@
     <div style="text-align: center; font-size: 10px;">¡Su salud en buenas manos! 💊</div>
 </div>
 
-<!-- COMPROBANTE TAMAÑO CARTA -->
+<!-- COMPROBANTE TAMAÑO CARTA (21.5 cm x 27.9 cm) -->
 <div id="facturaCartaImpresion">
-    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #0D47A1; padding-bottom: 10px; margin-bottom: 15px;">
-        <div>
-            <h2 style="color: #0D47A1; margin: 0;">FARMACIA FARMAPP POS</h2>
-            <p style="margin: 3px 0; font-size: 11px;" id="cartaSucursalNombre">Sucursal: Farmacia FarmApp POS - Principal</p>
-            <p style="margin: 3px 0; font-size: 11px;">Calle 15 de Septiembre, frente al triángulo, Los Amates, Izabal</p>
-            <p style="margin: 3px 0; font-size: 11px;">WhatsApp: 3565 0881 | NIT: 53050290</p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 2px solid #0D47A1; padding-bottom: 8px; margin-bottom: 12px;">
+        <div style="flex: 1; min-width: 0;">
+            <h2 style="color: #0D47A1; margin: 0 0 4px 0; font-size: 16px; text-align: left;">FARMACIA FARMAPP POS</h2>
+            <p style="margin: 2px 0; font-size: 11px;" id="cartaSucursalNombre">Sucursal: Farmacia FarmApp POS - Principal</p>
+            <p style="margin: 2px 0; font-size: 11px;">Calle 15 de Septiembre, frente al triángulo, Los Amates, Izabal</p>
+            <p style="margin: 2px 0; font-size: 11px;">WhatsApp: 3565 0881 | NIT: 53050290</p>
         </div>
-        <div style="text-align: right;">
-            <h3 style="color: #0D47A1; margin: 0;">COMPROBANTE DE VENTA</h3>
-            <p style="margin: 3px 0; font-size: 11px;" id="cartaFechaHora"></p>
+        <div style="text-align: right; flex-shrink: 0; max-width: 45%;">
+            <h3 style="color: #0D47A1; margin: 0 0 4px 0; font-size: 13px; text-align: right;">COMPROBANTE DE VENTA</h3>
+            <p style="margin: 2px 0; font-size: 11px;" id="cartaFechaHora"></p>
         </div>
     </div>
 
-    <div style="margin-bottom: 15px; font-size: 12px;">
-        <strong>Cliente:</strong> _________________________________________ &nbsp;&nbsp;&nbsp;&nbsp; <strong>NIT:</strong> _______________
+    <div style="margin-bottom: 12px; font-size: 11px; display: flex; justify-content: space-between; gap: 12px;">
+        <span style="flex: 1;"><strong>Cliente:</strong> ____________________________________</span>
+        <span style="white-space: nowrap;"><strong>NIT:</strong> _____________</span>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px;">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 11px;">
         <thead>
             <tr style="background-color: #0D47A1; color: white;">
-                <th style="padding: 8px; border: 1px solid #ddd;">Descripción del Producto</th>
-                <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Cantidad</th>
-                <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Precio Unitario</th>
-                <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Subtotal</th>
+                <th style="padding: 6px; border: 1px solid #ddd; width: 46%; text-align: left;">Descripción del Producto</th>
+                <th style="padding: 6px; border: 1px solid #ddd; width: 16%; text-align: center;">Cantidad</th>
+                <th style="padding: 6px; border: 1px solid #ddd; width: 19%; text-align: right;">Precio Unitario</th>
+                <th style="padding: 6px; border: 1px solid #ddd; width: 19%; text-align: right;">Subtotal</th>
             </tr>
         </thead>
         <tbody id="cartaContenidoItems"></tbody>
     </table>
 
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
-        <div style="width: 250px; font-size: 12px;">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+        <div style="width: 240px; font-size: 11px;">
             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
                 <span>Total a Pagar:</span>
-                <strong id="cartaTotalTexto">Q0.00</strong>
+                <strong id="cartaTotalTexto" style="white-space: nowrap;">Q0.00</strong>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
                 <span>Efectivo Recibido:</span>
-                <span id="cartaEfectivoTexto">Q0.00</span>
+                <span id="cartaEfectivoTexto" style="white-space: nowrap;">Q0.00</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 4px 0; font-weight: bold; color: #0D47A1;">
                 <span>Su Vuelto:</span>
-                <span id="cartaVueltoTexto">Q0.00</span>
+                <span id="cartaVueltoTexto" style="white-space: nowrap;">Q0.00</span>
             </div>
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 40px; font-size: 11px; color: #555;">
-        <p>¡Gracias por su compra en Farmacia FarmApp POS Los Amates! Conserve este comprobante para cualquier cambio o garantía.</p>
+    <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #555;">
+        <p style="margin: 0;">¡Gracias por su compra en Farmacia FarmApp POS Los Amates! Conserve este comprobante para cualquier cambio o garantía.</p>
     </div>
 </div>
 
@@ -444,6 +459,7 @@
         <input type="password" id="inputPinAdmin" placeholder="****" autofocus onkeydown="manejarEnterPin(event)" style="text-align:center; font-size: 1.3rem; margin-bottom: 12px; letter-spacing: 4px;">
         <button class="btn" onclick="verificarPinAdmin()">Ingresar a Admin</button>
         <button class="btn" style="background-color: #757575; margin-top: 8px;" onclick="entrarComoCajero()">Modo Cajero (Solo Ventas)</button>
+        <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 </div>
 
@@ -557,7 +573,6 @@
                 <input type="text" id="buscador" placeholder="🔍 Buscar por nombre, código, estante o proveedor... (Presione Enter para limpiar)" oninput="filtrarProductosConDebounce()" onkeydown="chequearEnterBuscadorInventario(event)">
             </div>
 
-            <!-- Botón Exportar a Excel colocado encima de la tabla -->
             <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
                 <button type="button" id="btnExportarExcel" onclick="exportarInventarioExcel()" style="background-color: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;">
                     📊 Exportar a Excel
@@ -579,6 +594,8 @@
                 </table>
             </div>
         </div>
+
+        <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 
     <!-- PESTAÑA 2: VENTAS / CARRITO POS -->
@@ -653,6 +670,8 @@
                 </div>
             </div>
         </div>
+
+        <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 
     <!-- PESTAÑA 3: REPORTES Y CUADRE DE CAJA -->
@@ -869,6 +888,8 @@
                 </table>
             </div>
         </div>
+
+        <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 
     <!-- PESTAÑA 4: CONFIGURACIÓN / PIN, SUCURSALES Y RESPALDO -->
@@ -914,6 +935,8 @@
                 <button class="btn" id="btnCargarRespaldo" style="background-color: #EF6C00; margin-top: 8px;" onclick="cargarRespaldoInventario()">📤 Restaurar / Cargar Respaldo</button>
             </div>
         </div>
+
+        <div class="footer-propiedad">Propiedad de <strong>OSMOTEC, Los Amates</strong></div>
     </div>
 </div>
 
@@ -2038,9 +2061,9 @@
                 htmlItemsCarta += `
                     <tr>
                         <td style="padding: 6px; border: 1px solid #ddd;"><strong>${item.nombre}</strong></td>
-                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${item.cantidadReq} ${tipoTexto}</td>
-                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">Q${item.precio.toFixed(2)}</td>
-                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right;">Q${subtotalItem.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: center; white-space: nowrap;">${item.cantidadReq} ${tipoTexto}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">Q${item.precio.toFixed(2)}</td>
+                        <td style="padding: 6px; border: 1px solid #ddd; text-align: right; white-space: nowrap;">Q${subtotalItem.toFixed(2)}</td>
                     </tr>
                 `;
 
@@ -3040,7 +3063,15 @@
         document.getElementById('interactiveVentas').style.display = 'none';
         document.getElementById('btnDetenerVentas').style.display = 'none';
     }
+
+    window.onafterprint = function() {
+        document.body.classList.remove(
+            'modo-impresion-termica',
+            'modo-impresion-carta',
+            'modo-impresion-pdf'
+        );
+    };
 </script>
 
 </body>
-                </html>
+    </html>
